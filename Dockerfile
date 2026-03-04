@@ -1,3 +1,14 @@
-# Dockerfile não necessário para dev
-# Use: docker compose up -d (sobe só o MySQL)
-# Depois: npm run dev (roda a app localmente)
+FROM node:22
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+RUN npx prisma generate
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]
