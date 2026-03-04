@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   id             Int            @id @default(autoincrement())
   name           String
@@ -14,6 +19,7 @@ model User {
   password       String
   refreshTokens  RefreshToken[]
   createdAt      DateTime       @default(now())
+  role           Role           @default(USER)
 }
 
 model RefreshToken {
