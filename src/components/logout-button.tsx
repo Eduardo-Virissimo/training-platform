@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -9,8 +9,8 @@ export default function LogoutButton() {
 
   async function handleLogout() {
     setLoading(true);
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
     router.refresh();
   }
 
@@ -20,7 +20,7 @@ export default function LogoutButton() {
       disabled={loading}
       className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
     >
-      {loading ? "Saindo..." : "Sair"}
+      {loading ? 'Saindo...' : 'Sair'}
     </button>
   );
 }

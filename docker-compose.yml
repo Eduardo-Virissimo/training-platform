@@ -6,23 +6,9 @@ services:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: training_platform
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
-  app:
-    build: .
-    restart: always
-    environment:
-      DATABASE_URL: mysql://root:123456@db:3306/training_platform
-      JWT_SECRET: sua-chave-secreta-aqui
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
-    depends_on:
-      - db
-    command: sh -c "npx prisma migrate deploy && npm run dev"
+
 volumes:
   mysql_data:

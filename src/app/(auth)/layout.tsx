@@ -1,8 +1,4 @@
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -23,9 +19,7 @@ export default function AuthLayout({
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-white">TrainUp</h1>
-          <p className="text-purple-300 mt-1">
-            Plataforma de Treinamentos Corporativos
-          </p>
+          <p className="text-purple-300 mt-1">Plataforma de Treinamentos Corporativos</p>
         </div>
 
         {children}

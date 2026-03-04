@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
@@ -30,10 +30,10 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push('/dashboard');
       router.refresh();
     } catch {
-      setError("Erro ao conectar com o servidor.");
+      setError('Erro ao conectar com o servidor.');
     } finally {
       setLoading(false);
     }
@@ -51,10 +51,7 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-purple-200 mb-1.5"
-          >
+          <label htmlFor="email" className="block text-sm font-medium text-purple-200 mb-1.5">
             Email
           </label>
           <input
@@ -69,10 +66,7 @@ export default function LoginPage() {
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-purple-200 mb-1.5"
-          >
+          <label htmlFor="password" className="block text-sm font-medium text-purple-200 mb-1.5">
             Senha
           </label>
           <input
@@ -112,14 +106,14 @@ export default function LoginPage() {
               Entrando...
             </span>
           ) : (
-            "Entrar"
+            'Entrar'
           )}
         </button>
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-gray-400 text-sm">
-          Não tem uma conta?{" "}
+          Não tem uma conta?{' '}
           <Link
             href="/register"
             className="text-purple-400 hover:text-purple-300 font-medium transition-colors"

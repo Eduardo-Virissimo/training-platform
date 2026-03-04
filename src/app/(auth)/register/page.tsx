@@ -1,33 +1,33 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (password !== confirmPassword) {
-      setError("As senhas não coincidem.");
+      setError('As senhas não coincidem.');
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
 
@@ -38,9 +38,9 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/login?registered=true");
+      router.push('/login?registered=true');
     } catch {
-      setError("Erro ao conectar com o servidor.");
+      setError('Erro ao conectar com o servidor.');
     } finally {
       setLoading(false);
     }
@@ -58,10 +58,7 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-purple-200 mb-1.5"
-          >
+          <label htmlFor="name" className="block text-sm font-medium text-purple-200 mb-1.5">
             Nome completo
           </label>
           <input
@@ -76,10 +73,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-purple-200 mb-1.5"
-          >
+          <label htmlFor="email" className="block text-sm font-medium text-purple-200 mb-1.5">
             Email
           </label>
           <input
@@ -94,10 +88,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-purple-200 mb-1.5"
-          >
+          <label htmlFor="password" className="block text-sm font-medium text-purple-200 mb-1.5">
             Senha
           </label>
           <input
@@ -157,14 +148,14 @@ export default function RegisterPage() {
               Criando conta...
             </span>
           ) : (
-            "Criar conta"
+            'Criar conta'
           )}
         </button>
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-gray-400 text-sm">
-          Já tem uma conta?{" "}
+          Já tem uma conta?{' '}
           <Link
             href="/login"
             className="text-purple-400 hover:text-purple-300 font-medium transition-colors"

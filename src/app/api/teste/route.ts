@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireRole } from "@/middlewares/requireRole";
+import { requireRole } from '@/middlewares/requireRole';
 
-export const GET = requireRole(
-  async (req, user) => {
-    return Response.json({ message: "Acesso liberado para usuário com papel ADMIN" });
-  },
-  "ADMIN");
+export const GET = requireRole(async () => {
+  return Response.json({
+    message: 'Acesso liberado para usuário com papel ADMIN',
+  });
+}, 'ADMIN');
