@@ -2,12 +2,11 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { prisma } from './prisma';
 import crypto from 'crypto';
-import { User } from '@prisma/client';
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-key');
 
 export interface JWTPayload {
-  id: number;
+  id: string;
   email: string;
   name: string;
 }
@@ -20,7 +19,7 @@ export async function createAccessToken(payload: JWTPayload): Promise<string> {
     .sign(secret);
 }
 
-export async function createRefreshToken(userId: number): Promise<string> {
+export async function createRefreshToken(userId: string): Promise<string> {
   const token = crypto.randomBytes(64).toString('hex');
 
   // limpa tokens antigos do usuário
@@ -53,7 +52,7 @@ export async function getSession(): Promise<JWTPayload | null> {
   return verifyAccessToken(token);
 }
 
-export async function getUserFromSession(): Promise<User | null> {
+export async function getUserFromSession() {
   const session = await getSession();
   if (!session) return null;
   const user = await prisma.user.findUnique({ where: { id: session.id } });
