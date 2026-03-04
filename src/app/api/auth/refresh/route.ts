@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createAccessToken } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { createAccessToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
-  const refreshToken = request.cookies.get("refreshToken")?.value;
-  const redirect = request.nextUrl.searchParams.get("redirect") || "/dashboard";
+  const refreshToken = request.cookies.get('refreshToken')?.value;
+  const redirect = request.nextUrl.searchParams.get('redirect') || '/dashboard';
 
   if (!refreshToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   try {
@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
         await prisma.refreshToken.delete({ where: { id: stored.id } });
       }
 
-      const response = NextResponse.redirect(new URL("/login", request.url));
-      response.cookies.set("accessToken", "", { maxAge: 0, path: "/" });
-      response.cookies.set("refreshToken", "", { maxAge: 0, path: "/" });
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.set('accessToken', '', { maxAge: 0, path: '/' });
+      response.cookies.set('refreshToken', '', { maxAge: 0, path: '/' });
       return response;
     }
 
@@ -36,17 +36,17 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.redirect(new URL(redirect, request.url));
 
-    response.cookies.set("accessToken", newAccessToken, {
+    response.cookies.set('accessToken', newAccessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 60 * 15,
-      path: "/",
+      path: '/',
     });
 
     return response;
   } catch (error) {
-    console.error("Erro no refresh:", error);
-    return NextResponse.redirect(new URL("/login", request.url));
+    console.error('Erro no refresh:', error);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 }
