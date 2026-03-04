@@ -3,7 +3,7 @@ import { verifyAccessToken } from "@/lib/auth";
 
 const publicRoutes = ["/login", "/register"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (

@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import crypto from "crypto";
+import { User } from "@prisma/client";
 
 const secret = new TextEncoder().encode(
   process.env.JWT_SECRET || "fallback-secret-key",
@@ -54,4 +55,12 @@ export async function getSession(): Promise<JWTPayload | null> {
   const token = cookieStore.get("accessToken")?.value;
   if (!token) return null;
   return verifyAccessToken(token);
+}
+
+export async function getUserFromSession(): Promise<User | null> {
+  const session = await getSession();
+  if (!session) return null;
+  const user = await prisma.user.findUnique({ where: { id: session.id } });
+  if (!user) return null;
+  return user;
 }
