@@ -3,6 +3,6 @@ import { requireRole } from "@/middlewares/requireRole";
 
 export const GET = requireRole(
   async (req, user) => {
-    return Response.json({ message: "Acesso liberado" });
+    return Response.json({ message: "Acesso liberado para usuário com papel ADMIN" });
   },
-  "USER",);
+  "ADMIN");
