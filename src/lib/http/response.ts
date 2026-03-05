@@ -1,4 +1,3 @@
-import { forbidden } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
 export const response = {
@@ -7,6 +6,9 @@ export const response = {
   },
   created(data: unknown) {
     return NextResponse.json({ msg: 'Created', data }, { status: 201 });
+  },
+  noContent() {
+    return new NextResponse(null, { status: 204 });
   },
 
   error(message: string) {
