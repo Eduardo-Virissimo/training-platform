@@ -4,27 +4,15 @@ import { response } from '@/lib/http/response';
 import { UserService } from '@/services/userService';
 import { UserSearchFilters, UserUpdateData } from '@/types/api.types';
 import { apiHandler } from '@/lib/http/api-handler';
-import { updateUserSchema } from '@/schemas/user.schema';
+import { updateUserSchema, userFiltersSchema, userParamsSchema } from '@/schemas/user.schema';
 import { Role } from '@prisma/client';
 
 export const GET = apiHandler({
   auth: true,
+  params: userFiltersSchema,
   role: Role.ADMIN,
-  async handler({ req }) {
-    const { searchParams } = new URL(req.url);
-    const filters: UserSearchFilters = {};
-
-    if (searchParams.get('name')) {
-      filters.name = searchParams.get('name') ?? undefined;
-    }
-    if (searchParams.get('email')) {
-      filters.email = searchParams.get('email') ?? undefined;
-    }
-    if (searchParams.get('id')) {
-      filters.id = searchParams.get('id') ?? undefined;
-    }
-
-    const users = await UserService.read(filters);
+  async handler({ req, params }) {
+    const users = await UserService.read(params as UserSearchFilters);
 
     return response.ok(users);
   },
@@ -32,12 +20,11 @@ export const GET = apiHandler({
 
 export const PUT = apiHandler({
   auth: true,
+  params: userParamsSchema,
   body: updateUserSchema,
   permissions: canUpdateUser,
-  handler: async ({ req, body }) => {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-
+  handler: async ({ req, body, params }) => {
+    const id = params?.id;
     const updatedUser = await UserService.update(id!, body as UserUpdateData);
     return response.ok(updatedUser);
   },

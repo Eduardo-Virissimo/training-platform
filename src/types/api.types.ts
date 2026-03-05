@@ -26,12 +26,18 @@ export type UserSearchFilters = {
   email?: string;
 };
 
-export type HandlerOptions<T> = {
+export type HandlerOptions<T, P> = {
   body?: z.ZodSchema<T>;
   auth?: boolean;
   role?: Role;
+  params?: z.ZodSchema<P>;
   permissions?: (ctx: PermissionContext) => boolean | Promise<boolean>;
-  handler: (ctx: { req: Request; body?: T; user?: UserHandler }) => Promise<NextResponse>;
+  handler: (ctx: {
+    req: Request;
+    body?: T;
+    user?: UserHandler;
+    params?: P;
+  }) => Promise<NextResponse>;
 };
 
 export type PermissionContext = {
