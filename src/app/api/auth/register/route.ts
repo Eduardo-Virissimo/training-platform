@@ -8,11 +8,11 @@ export async function POST(request: NextRequest) {
     const { name, email, password } = await request.json();
 
     if (!name || !email || !password) {
-      return response.error('Nome, email e senha são obrigatórios.');
+      return response.error('Nome, email e senha são obrigatórios.', 400);
     }
 
     if (password.length < 6) {
-      return response.error('A senha deve ter pelo menos 6 caracteres.');
+      return response.error('A senha deve ter pelo menos 6 caracteres.', 400);
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return response.conflictError('Este email já está cadastrado.');
+      return response.error('Este email já está cadastrado.', 409);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -38,6 +38,6 @@ export async function POST(request: NextRequest) {
       user: { id: user.id, name: user.name, email: user.email },
     });
   } catch (error) {
-    return response.internalError('Erro interno do servidor.');
+    return response.error('Erro interno do servidor.', 500);
   }
 }

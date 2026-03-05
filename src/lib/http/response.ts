@@ -1,4 +1,3 @@
-import { forbidden } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
 export const response = {
@@ -8,70 +7,18 @@ export const response = {
   created(data: unknown) {
     return NextResponse.json({ msg: 'Created', data }, { status: 201 });
   },
-
-  error(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 400,
-      },
-      { status: 400 }
-    );
+  noContent() {
+    return new NextResponse(null, { status: 204 });
   },
 
-  notFound(message: string) {
+  error(message: string, status = 400) {
     return NextResponse.json(
       {
         error: { message },
         timestamp: new Date().toISOString(),
-        statusCode: 404,
+        statusCode: status,
       },
-      { status: 404 }
-    );
-  },
-
-  unauthorized(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 401,
-      },
-      { status: 401 }
-    );
-  },
-
-  forbidden(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 403,
-      },
-      { status: 403 }
-    );
-  },
-
-  internalError(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 500,
-      },
-      { status: 500 }
-    );
-  },
-
-  conflictError(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 409,
-      },
-      { status: 409 }
+      { status: status }
     );
   },
 };

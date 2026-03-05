@@ -1,61 +1,56 @@
 'use server';
-
-import { NextResponse } from 'next/server';
-import { requireRole } from '@/permissions/requireRole';
-import { prisma } from '@/lib/prisma';
-import { ApiResponse } from '@/types/api.types';
 import { canUpdateUser } from '@/permissions/userPermissions';
-import bcrypt from 'bcryptjs';
 import { response } from '@/lib/http/response';
+import { UserService } from '@/services/userService';
+import { UserSearchFilters, UserUpdateData } from '@/types/api.types';
+import { apiHandler } from '@/lib/http/api-handler';
+import { updateUserSchema } from '@/schemas/user.schema';
+import { Role } from '@prisma/client';
 
-export const GET = requireRole(async (req) => {
-  const { searchParams } = new URL(req.url);
+export const GET = apiHandler({
+  auth: true,
+  role: Role.ADMIN,
+  async handler({ req }) {
+    const { searchParams } = new URL(req.url);
+    const filters: UserSearchFilters = {};
 
-  const id = searchParams.get('id');
-  const users = await prisma.user.findMany({
-    where: { id: id ?? undefined },
-    select: {
-      id: true,
-      name: true,
-      role: true,
-    },
-  });
+    if (searchParams.get('name')) {
+      filters.name = searchParams.get('name') ?? undefined;
+    }
+    if (searchParams.get('email')) {
+      filters.email = searchParams.get('email') ?? undefined;
+    }
+    if (searchParams.get('id')) {
+      filters.id = searchParams.get('id') ?? undefined;
+    }
 
-  return response.ok(users);
-}, 'ADMIN');
+    const users = await UserService.read(filters);
 
-export const PUT = canUpdateUser(async (req) => {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
-  const body = await req.json();
+    return response.ok(users);
+  },
+});
 
-  if (!id) {
-    return response.error('ID do usuário é obrigatório');
-  }
+export const PUT = apiHandler({
+  auth: true,
+  body: updateUserSchema,
+  permissions: canUpdateUser,
+  handler: async ({ req, body }) => {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
 
-  let passwordHash: string | undefined = undefined;
-  if (body.password) {
-    passwordHash = await bcrypt.hash(body.password, 10);
-  }
+    const updatedUser = await UserService.update(id!, body as UserUpdateData);
+    return response.ok(updatedUser);
+  },
+});
 
-  return await prisma.user
-    .update({
-      where: { id },
-      data: {
-        name: body.name ?? undefined,
-        email: body.email ?? undefined,
-        password: passwordHash ?? undefined,
-      },
-    })
-    .then((userUpdated) => {
-      return response.ok(userUpdated);
-    })
-    .catch((err) => {
-      console.log('Error updating user:', err);
-      if (err.code === 'P2025') {
-        return response.notFound('User not found');
-      }
+export const DELETE = apiHandler({
+  auth: true,
+  permissions: canUpdateUser,
+  handler: async ({ req }) => {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
 
-      return response.error('Failed to update user');
-    });
+    await UserService.delete(id!);
+    return response.noContent();
+  },
 });
