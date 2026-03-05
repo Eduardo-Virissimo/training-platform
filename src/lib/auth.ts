@@ -20,11 +20,7 @@ export async function createAccessToken(payload: JWTPayload): Promise<string> {
 }
 
 export async function createRefreshToken(userId: string): Promise<string> {
-<<<<<<< HEAD
-  const token = crypto.randomBytes(64).toString("hex");
-=======
   const token = crypto.randomBytes(64).toString('hex');
->>>>>>> 87bc2114b0137101dc666e3456227e3676a2694e
 
   // limpa tokens antigos do usuário
   await prisma.refreshToken.deleteMany({ where: { userId } });
