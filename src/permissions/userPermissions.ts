@@ -1,8 +1,9 @@
 import { getUserFromSession } from '@/lib/auth';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { response } from '../lib/http/response';
+import { UserHandler } from '@/types/api.types';
 
-type Handler = (req: Request, user: User) => Promise<Response>;
+type Handler = (req: Request, user: UserHandler) => Promise<Response>;
 
 export function canUpdateUser(handler: Handler) {
   return async (req: Request) => {
@@ -16,7 +17,7 @@ export function canUpdateUser(handler: Handler) {
       const id = searchParams.get('id');
 
       if (!id) {
-        return response.error('ID do usuário é obrigatório', 400);
+        return response.error('ID do usuário é obrigatório');
       }
       if (user.role === 'ADMIN' || user.id === id) {
         return handler(req, user);
