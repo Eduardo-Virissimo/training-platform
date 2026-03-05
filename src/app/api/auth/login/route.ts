@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return response.unauthorized('Email ou senha incorretos.');
+      return response.error('Email ou senha incorretos.', 401);
     }
 
     const accessToken = await createAccessToken({
@@ -50,6 +50,6 @@ export async function POST(request: NextRequest) {
     return responseCookies;
   } catch (error) {
     console.error('Erro no login:', error);
-    return response.internalError('Erro interno do servidor.');
+    return response.error('Erro interno do servidor.', 500);
   }
 }

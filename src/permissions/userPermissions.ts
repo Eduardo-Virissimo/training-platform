@@ -1,4 +1,4 @@
-import { AppError } from '@/errors/Errors';
+import { AppError } from '@/errors/AppError';
 import { PermissionContext } from '@/types/api.types';
 
 export function canUpdateUser(ctx: PermissionContext): boolean {

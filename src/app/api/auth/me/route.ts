@@ -6,7 +6,7 @@ export async function GET() {
   const session = await getUserFromSession();
 
   if (!session) {
-    return response.unauthorized('Não autenticado.');
+    return response.error('Não autenticado.', 401);
   }
 
   return response.ok(session);

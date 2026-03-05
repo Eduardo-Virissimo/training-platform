@@ -2,6 +2,7 @@ import { UserHandler, UserSearchFilters, UserUpdateData } from '@/types/api.type
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { AppError } from '@/errors/AppError';
 
 export class UserService {
   static async read(filters: UserSearchFilters): Promise<UserHandler[]> {
@@ -24,7 +25,10 @@ export class UserService {
         select: { id: true, name: true, email: true, role: true },
       })
       .catch((err) => {
-        throw err;
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+          throw new AppError('User not found', 404);
+        }
+        throw new AppError('An error occurred while updating the user', 500);
       });
   }
 

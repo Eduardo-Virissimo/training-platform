@@ -1,9 +1,8 @@
-import { AppError } from '@/errors/Errors';
+import { AppError } from '@/errors/AppError';
 import { response } from '@/lib/http/response';
 import { getUserFromSession } from '../auth';
 import { checkRole } from '@/permissions/requireRole';
 import { HandlerOptions } from '@/types/api.types';
-import { Role } from '@prisma/client';
 
 export function apiHandler<T>(options: HandlerOptions<T>) {
   return async (req: Request) => {
@@ -40,12 +39,10 @@ export function apiHandler<T>(options: HandlerOptions<T>) {
       return result;
     } catch (error) {
       if (error instanceof AppError) {
-        return response.error(error.message);
+        return response.error(error.message, error.statusCode);
       }
 
-      console.error(error);
-
-      return response.error('Internal server error');
+      return response.error('Internal server error', 500);
     }
   };
 }

@@ -1,4 +1,4 @@
-import { AppError } from '@/errors/Errors';
+import { AppError } from '@/errors/AppError';
 import { Role } from '@prisma/client';
 
 export const ROLE_HIERARCHY = {

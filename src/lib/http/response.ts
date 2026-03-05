@@ -11,69 +11,14 @@ export const response = {
     return new NextResponse(null, { status: 204 });
   },
 
-  error(message: string) {
+  error(message: string, status = 400) {
     return NextResponse.json(
       {
         error: { message },
         timestamp: new Date().toISOString(),
-        statusCode: 400,
+        statusCode: status,
       },
-      { status: 400 }
-    );
-  },
-
-  notFound(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 404,
-      },
-      { status: 404 }
-    );
-  },
-
-  unauthorized(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 401,
-      },
-      { status: 401 }
-    );
-  },
-
-  forbidden(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 403,
-      },
-      { status: 403 }
-    );
-  },
-
-  internalError(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 500,
-      },
-      { status: 500 }
-    );
-  },
-
-  conflictError(message: string) {
-    return NextResponse.json(
-      {
-        error: { message },
-        timestamp: new Date().toISOString(),
-        statusCode: 409,
-      },
-      { status: 409 }
+      { status: status }
     );
   },
 };
