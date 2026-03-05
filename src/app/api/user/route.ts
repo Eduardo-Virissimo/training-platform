@@ -30,7 +30,7 @@ export const PUT = canUpdateUser(async (req) => {
   const body = await req.json();
 
   if (!id) {
-    return response.error('ID do usuário é obrigatório', 400);
+    return response.error('ID do usuário é obrigatório');
   }
 
   let passwordHash: string | undefined = undefined;
@@ -53,9 +53,9 @@ export const PUT = canUpdateUser(async (req) => {
     .catch((err) => {
       console.log('Error updating user:', err);
       if (err.code === 'P2025') {
-        return response.notFound('User not found', 404);
+        return response.notFound('User not found');
       }
 
-      return response.error('Failed to update user', 500);
+      return response.error('Failed to update user');
     });
 });
