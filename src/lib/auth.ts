@@ -55,7 +55,10 @@ export async function getSession(): Promise<JWTPayload | null> {
 export async function getUserFromSession() {
   const session = await getSession();
   if (!session) return null;
-  const user = await prisma.user.findUnique({ where: { id: session.id } });
+  const user = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { id: true, email: true, name: true, role: true },
+  });
   if (!user) return null;
   return user;
 }

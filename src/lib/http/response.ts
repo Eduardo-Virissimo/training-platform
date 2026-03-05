@@ -2,70 +2,76 @@ import { forbidden } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
 export const response = {
-  ok(data: unknown, status = 200) {
-    return NextResponse.json({ msg: 'Object retrieved successfully', data }, { status });
+  ok(data: unknown) {
+    return NextResponse.json({ msg: 'OK', data }, { status: 200 });
   },
-  created(data: unknown, status = 201) {
-    return NextResponse.json({ msg: 'Object created successfully', data }, { status: 201 });
+  created(data: unknown) {
+    return NextResponse.json({ msg: 'Created', data }, { status: 201 });
   },
 
-  error(message: string, status = 400) {
+  error(message: string) {
     return NextResponse.json(
       {
-        msg: 'An error occurred',
         error: { message },
         timestamp: new Date().toISOString(),
-        statusCode: status,
+        statusCode: 400,
       },
-      { status }
+      { status: 400 }
     );
   },
 
-  notFound(message: string, status = 404) {
+  notFound(message: string) {
     return NextResponse.json(
       {
-        msg: 'Object not found',
         error: { message },
         timestamp: new Date().toISOString(),
-        statusCode: status,
+        statusCode: 404,
       },
-      { status }
+      { status: 404 }
     );
   },
 
-  unauthorized(message: string, status = 401) {
+  unauthorized(message: string) {
     return NextResponse.json(
       {
-        msg: 'Unauthorized',
         error: { message },
         timestamp: new Date().toISOString(),
-        statusCode: status,
+        statusCode: 401,
       },
-      { status }
+      { status: 401 }
     );
   },
 
-  forbidden(message: string, status = 403) {
+  forbidden(message: string) {
     return NextResponse.json(
       {
-        msg: 'Forbidden',
         error: { message },
         timestamp: new Date().toISOString(),
-        statusCode: status,
+        statusCode: 403,
       },
-      { status }
+      { status: 403 }
     );
   },
 
-  internalError(message: string, status = 500) {
+  internalError(message: string) {
     return NextResponse.json(
       {
-        msg: 'Internal Server Error',
         error: { message },
         timestamp: new Date().toISOString(),
-        statusCode: status,
+        statusCode: 500,
       },
-      { status }
+      { status: 500 }
+    );
+  },
+
+  conflictError(message: string) {
+    return NextResponse.json(
+      {
+        error: { message },
+        timestamp: new Date().toISOString(),
+        statusCode: 409,
+      },
+      { status: 409 }
     );
   },
 };

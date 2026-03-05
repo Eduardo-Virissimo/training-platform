@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { ApiResponse } from '@/types/api.types';
 import { canUpdateUser } from '@/permissions/userPermissions';
 import bcrypt from 'bcryptjs';
+import { response } from '@/lib/http/response';
 
 export const GET = requireRole(async (req) => {
   const { searchParams } = new URL(req.url);
@@ -20,12 +21,7 @@ export const GET = requireRole(async (req) => {
     },
   });
 
-  const apiResponse: ApiResponse<typeof users> = {
-    data: users,
-    msg: 'Usuários listados com sucesso',
-  };
-
-  return NextResponse.json(apiResponse);
+  return response.ok(users);
 }, 'ADMIN');
 
 export const PUT = canUpdateUser(async (req) => {
@@ -34,7 +30,7 @@ export const PUT = canUpdateUser(async (req) => {
   const body = await req.json();
 
   if (!id) {
-    return NextResponse.json({ error: 'ID do usuário é obrigatório' }, { status: 400 });
+    return response.error('ID do usuário é obrigatório', 400);
   }
 
   let passwordHash: string | undefined = undefined;
@@ -42,19 +38,24 @@ export const PUT = canUpdateUser(async (req) => {
     passwordHash = await bcrypt.hash(body.password, 10);
   }
 
-  const userUpdated = await prisma.user.update({
-    where: { id },
-    data: {
-      name: body.name ?? undefined,
-      email: body.email ?? undefined,
-      password: passwordHash ?? undefined,
-    },
-  });
+  return await prisma.user
+    .update({
+      where: { id },
+      data: {
+        name: body.name ?? undefined,
+        email: body.email ?? undefined,
+        password: passwordHash ?? undefined,
+      },
+    })
+    .then((userUpdated) => {
+      return response.ok(userUpdated);
+    })
+    .catch((err) => {
+      console.log('Error updating user:', err);
+      if (err.code === 'P2025') {
+        return response.notFound('User not found', 404);
+      }
 
-  const apiResponse = {
-    msg: 'Usuário atualizado com sucesso',
-    data: userUpdated,
-  };
-
-  return NextResponse.json(apiResponse);
+      return response.error('Failed to update user', 500);
+    });
 });
