@@ -9,7 +9,7 @@ const secret = new TextEncoder().encode(
 );
 
 export interface JWTPayload {
-  id: number;
+  id: string;
   email: string;
   name: string;
 }
@@ -22,7 +22,7 @@ export async function createAccessToken(payload: JWTPayload): Promise<string> {
     .sign(secret);
 }
 
-export async function createRefreshToken(userId: number): Promise<string> {
+export async function createRefreshToken(userId: string): Promise<string> {
   const token = crypto.randomBytes(64).toString("hex");
 
   // limpa tokens antigos do usuário
