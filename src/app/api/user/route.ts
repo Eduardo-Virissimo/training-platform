@@ -5,8 +5,11 @@ import { UserService } from '@/services/userService';
 import { UserSearchFilters, UserUpdateData } from '@/types/api.types';
 import { apiHandler } from '@/lib/http/api-handler';
 import { updateUserSchema } from '@/schemas/user.schema';
+import { Role } from '@prisma/client';
 
 export const GET = apiHandler({
+  auth: true,
+  role: Role.ADMIN,
   async handler({ req }) {
     const { searchParams } = new URL(req.url);
     const filters: UserSearchFilters = {};
@@ -34,9 +37,8 @@ export const PUT = apiHandler({
   handler: async ({ req, body }) => {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
-    const bodyData = body as UserUpdateData;
 
-    const updatedUser = await UserService.update(id!, bodyData);
+    const updatedUser = await UserService.update(id!, body as UserUpdateData);
     return response.ok(updatedUser);
   },
 });

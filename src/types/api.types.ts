@@ -29,7 +29,7 @@ export type UserSearchFilters = {
 export type HandlerOptions<T> = {
   body?: z.ZodSchema<T>;
   auth?: boolean;
-  role?: string;
+  role?: Role;
   permissions?: (ctx: PermissionContext) => boolean | Promise<boolean>;
   handler: (ctx: { req: Request; body?: T; user?: UserHandler }) => Promise<NextResponse>;
 };

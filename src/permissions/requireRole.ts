@@ -1,3 +1,4 @@
+import { AppError } from '@/errors/Errors';
 import { Role } from '@prisma/client';
 
 export const ROLE_HIERARCHY = {
@@ -9,7 +10,9 @@ export function checkRole(userRole: Role, requiredRole: Role) {
   const userLevel = ROLE_HIERARCHY[userRole];
   const requiredLevel = ROLE_HIERARCHY[requiredRole];
 
+  console.log({ userRole, requiredRole });
+
   if (!userLevel || userLevel < requiredLevel) {
-    throw new Error('Forbidden: insufficient permissions');
+    throw new AppError('Forbidden: insufficient permissions');
   }
 }

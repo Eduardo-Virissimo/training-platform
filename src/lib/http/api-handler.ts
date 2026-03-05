@@ -26,7 +26,9 @@ export function apiHandler<T>(options: HandlerOptions<T>) {
       }
 
       if (options.role && user) {
-        checkRole(user.role, options.role as Role);
+        checkRole(user.role, options.role);
+      } else if (options.role && !user) {
+        throw new AppError('Unauthorized', 401);
       }
 
       const result = await options.handler({
