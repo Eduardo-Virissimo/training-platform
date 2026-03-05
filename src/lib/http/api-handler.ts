@@ -3,10 +3,22 @@ import { response } from '@/lib/http/response';
 import { getUserFromSession } from '../auth';
 import { checkRole } from '@/permissions/requireRole';
 import { HandlerOptions } from '@/types/api.types';
+import { ZodError } from 'zod';
 
-export function apiHandler<T>(options: HandlerOptions<T>) {
+export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions<T, P>) {
   return async (req: Request) => {
     try {
+      let params = undefined;
+
+      if (options.params) {
+        const { searchParams } = new URL(req.url);
+        const paramsObj: Record<string, string> = {};
+        for (const [key, value] of searchParams.entries()) {
+          paramsObj[key] = value;
+        }
+        params = options.params.parse(paramsObj);
+      }
+
       let body = undefined;
 
       if (options.body) {
@@ -33,6 +45,7 @@ export function apiHandler<T>(options: HandlerOptions<T>) {
       const result = await options.handler({
         req,
         body,
+        params,
         user,
       });
 
@@ -40,6 +53,10 @@ export function apiHandler<T>(options: HandlerOptions<T>) {
     } catch (error) {
       if (error instanceof AppError) {
         return response.error(error.message, error.statusCode);
+      }
+
+      if (error instanceof ZodError) {
+        return response.error('Bad Request', 400);
       }
 
       return response.error('Internal server error', 500);
