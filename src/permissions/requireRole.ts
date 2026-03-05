@@ -1,6 +1,6 @@
 import { getUserFromSession } from '@/lib/auth';
 import { Role } from '@prisma/client/wasm';
-
+import { response } from '../lib/http/response';
 export const ROLE_HIERARCHY = {
   USER: 1,
   ADMIN: 2,
@@ -15,7 +15,7 @@ export function requireRole(handler: Handler, requiredRole?: Role) {
       const user = await getUserFromSession();
 
       if (!user) {
-        return Response.json({ error: 'Invalid token' }, { status: 401 });
+        return response.unauthorized('Invalid token');
       }
 
       if (requiredRole) {
@@ -23,13 +23,13 @@ export function requireRole(handler: Handler, requiredRole?: Role) {
         const requiredLevel = ROLE_HIERARCHY[requiredRole];
 
         if (!userLevel || userLevel < requiredLevel) {
-          return Response.json({ error: 'Forbidden' }, { status: 403 });
+          return response.forbidden('You are not allowed to perform this action');
         }
       }
 
       return handler(req, user);
     } catch {
-      return Response.json({ error: 'Internal error' }, { status: 500 });
+      return response.internalError('An unexpected error occurred while processing the request');
     }
   };
 }

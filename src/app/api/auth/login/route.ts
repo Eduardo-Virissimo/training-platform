@@ -2,19 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createAccessToken, createRefreshToken } from '@/lib/auth';
+import { response } from '@/lib/http/response';
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json({ error: 'Email e senha são obrigatórios.' }, { status: 400 });
+      return response.error('Email e senha são obrigatórios.');
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return NextResponse.json({ error: 'Email ou senha incorretos.' }, { status: 401 });
+      return response.unauthorized('Email ou senha incorretos.');
     }
 
     const accessToken = await createAccessToken({
@@ -25,12 +26,12 @@ export async function POST(request: NextRequest) {
 
     const refreshToken = await createRefreshToken(user.id);
 
-    const response = NextResponse.json(
+    const responseCookies = NextResponse.json(
       { message: 'Login realizado com sucesso!' },
       { status: 200 }
     );
 
-    response.cookies.set('accessToken', accessToken, {
+    responseCookies.cookies.set('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
-    response.cookies.set('refreshToken', refreshToken, {
+    responseCookies.cookies.set('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -46,9 +47,9 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
-    return response;
+    return responseCookies;
   } catch (error) {
     console.error('Erro no login:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
+    return response.internalError('Erro interno do servidor.');
   }
 }
