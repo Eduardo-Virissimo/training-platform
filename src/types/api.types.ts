@@ -45,3 +45,19 @@ export type PermissionContext = {
   body: unknown;
   req: Request;
 };
+
+export type TrackCreateData = {
+  title: string;
+  description?: string;
+  userId: string;
+};
+
+export type TrackUpdateData = {
+  title?: string;
+  description?: string;
+};
+
+export type TrackSearchFilters = {
+  id?: string;
+  title?: string;
+};
