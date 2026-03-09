@@ -11,10 +11,10 @@ export const response = {
     return new NextResponse(null, { status: 204 });
   },
 
-  error(message: string, status = 400) {
+  error(message: string, status = 400, issues: unknown = null) {
     return NextResponse.json(
       {
-        error: { message },
+        error: { message, issues },
         timestamp: new Date().toISOString(),
         statusCode: status,
       },
