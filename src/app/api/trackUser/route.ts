@@ -5,6 +5,7 @@ import { canManageTrack } from '@/permissions/track.permissions';
 import { idParamSchema } from '@/schemas/schemas';
 import { TrackUserService } from '@/services/trackUser.service';
 import { trackUserCreateSchema } from '@/schemas/trackUser.schemas';
+
 export const POST = apiHandler({
   auth: true,
   body: trackUserCreateSchema,
@@ -14,5 +15,15 @@ export const POST = apiHandler({
     const trackUser = await TrackUserService.addUserToTrack(params!.id, body!.email);
 
     return response.ok(trackUser);
+  },
+});
+
+export const DELETE = apiHandler({
+  auth: true,
+  params: idParamSchema,
+  permissions: canManageTrack,
+  handler: async ({ req, params }) => {
+    await TrackUserService.removeUserFromTrack(params!.id);
+    return response.noContent();
   },
 });
