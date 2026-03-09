@@ -13,6 +13,7 @@ export class TrackService {
           userTracks: {
             create: {
               userId: data.userId,
+              role: 'INSTRUCTOR',
             },
           },
         },
@@ -60,6 +61,19 @@ export class TrackService {
       return tracks;
     } catch (error) {
       throw new AppError('Failed to search tracks', 500);
+    }
+  }
+
+  static async addUserToTrack(trackId: string, userId: string) {
+    try {
+      return await prisma.userTrack.create({
+        data: {
+          trackId,
+          userId,
+        },
+      });
+    } catch (error) {
+      throw new AppError('Failed to add user to track', 500);
     }
   }
 }

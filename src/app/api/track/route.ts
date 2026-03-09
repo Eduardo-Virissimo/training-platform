@@ -3,7 +3,7 @@ import { response } from '@/lib/http/response';
 import { canManageTrack } from '@/permissions/track.permissions';
 import { idParamSchema } from '@/schemas/schemas';
 import { createTrackSchema, trackFiltersSchema } from '@/schemas/track.schemas';
-import { TrackService } from '@/services/trackService';
+import { TrackService } from '@/services/track.service.';
 import { TrackCreateData, TrackSearchFilters } from '@/types/api.types';
 
 export const POST = apiHandler({

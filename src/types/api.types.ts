@@ -8,24 +8,6 @@ export type ApiResponse<T> = {
   error?: string;
 };
 
-export type UserHandler = {
-  name: string;
-  id: string;
-  email: string;
-  role: Role;
-};
-
-export type UserUpdateData = {
-  name?: string;
-  email?: string;
-  password?: string;
-};
-export type UserSearchFilters = {
-  id?: string;
-  name?: string;
-  email?: string;
-};
-
 export type HandlerOptions<T, P> = {
   body?: z.ZodSchema<T>;
   auth?: boolean;
