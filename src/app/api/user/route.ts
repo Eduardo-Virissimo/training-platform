@@ -11,7 +11,7 @@ export const GET = apiHandler({
   auth: true,
   params: userFiltersSchema,
   role: Role.ADMIN,
-  async handler({ req, params }) {
+  handler: async ({ req, params }) => {
     const users = await UserService.read(params as UserSearchFilters);
 
     return response.ok(users);
