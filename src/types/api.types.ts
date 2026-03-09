@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { Role } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { UserHandler } from './user.types';
 
 export type ApiResponse<T> = {
   msg?: string;
