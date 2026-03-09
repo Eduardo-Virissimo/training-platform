@@ -5,44 +5,32 @@ import { apiHandler } from '@/lib/http/api-handler';
 import { loginSchema } from '@/schemas/auth.schema';
 import { AppError } from '@/errors/AppError';
 import { response } from '@/lib/http/response';
+import { authenticateUser } from '@/services/auth.service';
+
+const BASE_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+};
 
 export const POST = apiHandler({
   body: loginSchema,
   handler: async ({ body }) => {
-    const { email, password } = body!;
-
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new AppError('Invalid email or password', 401);
-    }
-
-    const accessToken = await createAccessToken({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    });
-
-    const refreshToken = await createRefreshToken(user.id);
+    const { accessToken, refreshToken } = await authenticateUser(body!);
 
     const res = response.ok({
       message: 'Login successful',
     });
 
     res.cookies.set('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
+      ...BASE_COOKIE_OPTIONS,
+      maxAge: 60 * 15,
     });
 
     res.cookies.set('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
+      ...BASE_COOKIE_OPTIONS,
+      maxAge: 60 * 60 * 24 * 15,
     });
 
     return res;
