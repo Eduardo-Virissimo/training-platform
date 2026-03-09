@@ -56,7 +56,11 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
       }
 
       if (error instanceof ZodError) {
-        return response.error('Bad Request', 400);
+        const issueMessages = error.issues.map(
+          (issue) => `${issue.path.join('.')} - ${issue.message}`
+        );
+
+        return response.error('Bad Request', 400, issueMessages);
       }
 
       return response.error('Internal server error', 500);
