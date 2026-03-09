@@ -1,11 +1,12 @@
 'use server';
-import { canUpdateUser } from '@/permissions/userPermissions';
+import { canManageUser } from '@/permissions/userPermissions';
 import { response } from '@/lib/http/response';
-import { UserService } from '@/services/userService';
-import { UserSearchFilters, UserUpdateData } from '@/types/api.types';
+import { UserService } from '@/services/user.service';
+import { UserSearchFilters, UserUpdateData } from '@/types/user.types';
 import { apiHandler } from '@/lib/http/api-handler';
 import { updateUserSchema, userFiltersSchema, userParamsSchema } from '@/schemas/user.schema';
 import { Role } from '@prisma/client';
+import { idParamSchema } from '@/schemas/schemas';
 
 export const GET = apiHandler({
   auth: true,
@@ -20,9 +21,9 @@ export const GET = apiHandler({
 
 export const PUT = apiHandler({
   auth: true,
-  params: userParamsSchema,
+  params: idParamSchema,
   body: updateUserSchema,
-  permissions: canUpdateUser,
+  permissions: canManageUser,
   handler: async ({ req, body, params }) => {
     const id = params?.id;
     const updatedUser = await UserService.update(id!, body as UserUpdateData);
@@ -32,7 +33,8 @@ export const PUT = apiHandler({
 
 export const DELETE = apiHandler({
   auth: true,
-  permissions: canUpdateUser,
+  params: idParamSchema,
+  permissions: canManageUser,
   handler: async ({ req }) => {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

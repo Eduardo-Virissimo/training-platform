@@ -1,7 +1,7 @@
 import { AppError } from '@/errors/AppError';
 import { PermissionContext } from '@/types/api.types';
 
-export function canUpdateUser(ctx: PermissionContext): boolean {
+export function canManageUser(ctx: PermissionContext): boolean {
   try {
     const { searchParams } = new URL(ctx.req.url);
     const id = searchParams.get('id');

@@ -1,4 +1,4 @@
-import { UserHandler, UserSearchFilters, UserUpdateData } from '@/types/api.types';
+import { UserHandler, UserSearchFilters, UserUpdateData } from '@/types/user.types';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
