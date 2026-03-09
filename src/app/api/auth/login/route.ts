@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createAccessToken, createRefreshToken } from '@/lib/auth';
+import { apiHandler } from '@/lib/http/api-handler';
+import { loginSchema } from '@/schemas/auth.schema';
+import { AppError } from '@/errors/AppError';
+import { response } from '@/lib/http/response';
 
-export async function POST(request: NextRequest) {
-  try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email e senha são obrigatórios.' }, { status: 400 });
-    }
+export const POST = apiHandler({
+  body: loginSchema,
+  handler: async ({ body }) => {
+    const { email, password } = body!;
 
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return NextResponse.json({ error: 'Email ou senha incorretos.' }, { status: 401 });
+      throw new AppError('Invalid email or password', 401);
     }
 
     const accessToken = await createAccessToken({
@@ -25,20 +25,11 @@ export async function POST(request: NextRequest) {
 
     const refreshToken = await createRefreshToken(user.id);
 
-    const response = NextResponse.json(
-      { message: 'Login realizado com sucesso!' },
-      { status: 200 }
-    );
-
-    response.cookies.set('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 15,
-      path: '/',
+    const res = response.ok({
+      message: 'Login successful',
     });
 
-    response.cookies.set('refreshToken', refreshToken, {
+    res.cookies.set('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -46,9 +37,14 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
-    return response;
-  } catch (error) {
-    console.error('Erro no login:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
-  }
-}
+    res.cookies.set('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
+
+    return res;
+  },
+});
