@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -13,21 +12,22 @@ enum Role {
 }
 
 model User {
-  id             String   @id @default(uuid()) @db.VarChar(36)
-  name           String
-  email          String   @unique
-  password       String
-  role           Role     @default(USER)
-  createdAt      DateTime @default(now())
-  refreshTokens  RefreshToken[]
+  id            String         @id @default(uuid()) @db.VarChar(36)
+  name          String
+  email         String         @unique
+  password      String
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  refreshTokens RefreshToken[]
 
-  trainings      UserTraining[]
-  tracks         UserTrack[]
-  quizAttempts   QuizAttempt[]
+  trainings    UserTraining[]
+  tracks       UserTrack[]
+  quizAttempts QuizAttempt[]
+  files        File[]
 }
 
 model RefreshToken {
-  id    String @id @default(uuid()) @db.VarChar(36)
+  id        String   @id @default(uuid()) @db.VarChar(36)
   token     String   @unique @db.VarChar(500)
   userId    String   @db.VarChar(36)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -36,61 +36,81 @@ model RefreshToken {
 }
 
 model File {
-  id        String @id @default(uuid()) @db.VarChar(36)
+  id        String     @id @default(uuid()) @db.VarChar(36)
   filename  String
   path      String
   mimetype  String
+  key       String     @unique
   size      Int
-  createdAt DateTime @default(now())
+  userId    String     @db.VarChar(36)
+  uploader  User       @relation(fields: [userId], references: [id])
+  createdAt DateTime   @default(now())
+  fileUsage FileUsage?
+}
+
+model FileUsage {
+  id        String        @id @default(uuid()) @db.VarChar(36)
+  fileId    String        @unique @db.VarChar(36)
+  usageType FileUsageType
+  usageId   String        @db.VarChar(36)
+
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+}
+
+enum FileUsageType {
+  TRAINING
+  TRACK
+  QUIZ
+  USER
 }
 
 model Training {
-  id          String   @id @default(uuid()) @db.VarChar(36)
+  id          String  @id @default(uuid()) @db.VarChar(36)
   title       String
   description String?
-  content     String   @db.LongText 
+  content     String  @db.LongText
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  tracks      TrackTraining[]
+  tracks        TrackTraining[]
   userTrainings UserTraining[]
 }
 
 model Track {
-  id          String   @id @default(uuid()) @db.VarChar(36)
+  id          String  @id @default(uuid()) @db.VarChar(36)
   title       String
   description String?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  trainings   TrackTraining[]
-  userTracks  UserTrack[]
-  quizTracks  QuizTrack[]
+  trainings  TrackTraining[]
+  userTracks UserTrack[]
+  quizTracks QuizTrack[]
 }
 
 model TrackTraining {
   trackId    String @db.VarChar(36)
   trainingId String @db.VarChar(36)
 
-  position   Int
+  position Int
 
-  track      Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  training Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
 
   @@id([trackId, trainingId])
 }
 
 model UserTraining {
-  id          String   @id @default(uuid()) @db.VarChar(36)
-  userId      String   @db.VarChar(36)
-  trainingId  String   @db.VarChar(36)
-  status      String   
+  id          String    @id @default(uuid()) @db.VarChar(36)
+  userId      String    @db.VarChar(36)
+  trainingId  String    @db.VarChar(36)
+  status      String
   startedAt   DateTime?
   completedAt DateTime?
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  training    Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  training Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
 
   @@unique([userId, trainingId])
 }
@@ -101,64 +121,61 @@ enum UserTrackStatus {
   COMPLETED
 }
 
-enum UserTrackRole{
+enum UserTrackRole {
   STUDENT
   INSTRUCTOR
 }
 
 model UserTrack {
-  id        String   @id @default(uuid()) @db.VarChar(36)
+  id String @id @default(uuid()) @db.VarChar(36)
 
-  userId    String   @db.VarChar(36)
-  trackId   String   @db.VarChar(36)
-  role      UserTrackRole @default(STUDENT)
+  userId  String        @db.VarChar(36)
+  trackId String        @db.VarChar(36)
+  role    UserTrackRole @default(STUDENT)
 
-  status    UserTrackStatus @default(NOT_STARTED)
+  status UserTrackStatus @default(NOT_STARTED)
 
-  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  track     Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
 
   @@unique([userId, trackId])
 }
 
 model QuizTrack {
-  trackId  String @db.VarChar(36)
-  quizId   String @db.VarChar(36)
+  trackId String @db.VarChar(36)
+  quizId  String @db.VarChar(36)
 
   position Int
 
-  track    Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  quiz     Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  quiz  Quiz  @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@id([trackId, quizId])
 }
 
-
-
-
 model Quiz {
-  id          String   @id @default(uuid()) @db.VarChar(36)
+  id          String  @id @default(uuid()) @db.VarChar(36)
   title       String
   description String?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  quizTracks  QuizTrack[]
-  questions   Question[]
-  attempts    QuizAttempt[]
+  quizTracks QuizTrack[]
+  questions  Question[]
+  attempts   QuizAttempt[]
 }
 
 model Question {
-  id        String   @id @default(uuid()) @db.VarChar(36)
-  quizId    String   @db.VarChar(36)
+  id     String @id @default(uuid()) @db.VarChar(36)
+  quizId String @db.VarChar(36)
 
-  content   String   @db.LongText
-  type      QuestionType
+  content String       @db.LongText
+  type    QuestionType
 
-  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-  options   Option[]
-  answers   Answer[]
+  options Option[]
+  answers Answer[]
 }
 
 enum QuestionType {
@@ -168,41 +185,41 @@ enum QuestionType {
 }
 
 model Option {
-  id          String   @id @default(uuid()) @db.VarChar(36)
-  questionId  String   @db.VarChar(36)
+  id         String @id @default(uuid()) @db.VarChar(36)
+  questionId String @db.VarChar(36)
 
-  content     String
-  isCorrect   Boolean
+  content   String
+  isCorrect Boolean
 
-  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  answers     Answer[]
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  Answer[]
 }
 
 model QuizAttempt {
-  id        String   @id @default(uuid()) @db.VarChar(36)
+  id String @id @default(uuid()) @db.VarChar(36)
 
-  userId    String   @db.VarChar(36)
-  quizId    String   @db.VarChar(36)
+  userId String @db.VarChar(36)
+  quizId String @db.VarChar(36)
 
-  score     Float
-  passed    Boolean
+  score  Float
+  passed Boolean
 
   createdAt DateTime @default(now())
 
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz      Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-  answers   Answer[]
+  answers Answer[]
 }
 
 model Answer {
-  id           String   @id @default(uuid()) @db.VarChar(36)
+  id String @id @default(uuid()) @db.VarChar(36)
 
-  attemptId    String   @db.VarChar(36)
-  questionId   String   @db.VarChar(36)
-  optionId     String   @db.VarChar(36)
+  attemptId  String @db.VarChar(36)
+  questionId String @db.VarChar(36)
+  optionId   String @db.VarChar(36)
 
-  attempt      QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question     Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  option       Option      @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  attempt  QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  option   Option      @relation(fields: [optionId], references: [id], onDelete: Cascade)
 }
