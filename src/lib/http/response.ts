@@ -11,7 +11,7 @@ export const response = {
     return new NextResponse(null, { status: 204 });
   },
 
-  error(message: string, status = 400, issues: unknown = null) {
+  error(message: string, status = 400, issues: unknown = undefined) {
     return NextResponse.json(
       {
         error: { message, issues },
