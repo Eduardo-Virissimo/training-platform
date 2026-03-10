@@ -1,52 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { createAccessToken } from '@/lib/auth';
+import { refreshSession, AUTH_CONFIG } from '@/lib/auth';
+import { getSafeRedirect } from '@/lib/url';
 
 export async function GET(request: NextRequest) {
-  const refreshToken = request.cookies.get('refreshToken')?.value;
-  const redirect = request.nextUrl.searchParams.get('redirect') || '/dashboard';
+  const currentRefreshToken = request.cookies.get('refreshToken')?.value;
+  const redirectPath = getSafeRedirect(
+    request.nextUrl.searchParams.get('redirect') || '/dashboard'
+  );
 
-  if (!refreshToken) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  if (!currentRefreshToken) {
+    return handleAuthFailure(request);
   }
 
   try {
-    const stored = await prisma.refreshToken.findUnique({
-      where: { token: refreshToken },
-      include: { user: true },
-    });
+    const tokens = await refreshSession(currentRefreshToken);
 
-    // token não existe ou expirou
-    if (!stored || stored.expiresAt < new Date()) {
-      if (stored) {
-        await prisma.refreshToken.delete({ where: { id: stored.id } });
-      }
-
-      const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.set('accessToken', '', { maxAge: 0, path: '/' });
-      response.cookies.set('refreshToken', '', { maxAge: 0, path: '/' });
-      return response;
+    if (!tokens) {
+      return handleAuthFailure(request);
     }
 
-    const newAccessToken = await createAccessToken({
-      id: stored.user.id,
-      email: stored.user.email,
-      name: stored.user.name,
+    const response = NextResponse.redirect(new URL(redirectPath, request.url));
+
+    response.cookies.set('accessToken', tokens.accessToken, {
+      ...AUTH_CONFIG.cookieOptions,
+      maxAge: AUTH_CONFIG.accessTokenExpiresIn,
     });
 
-    const response = NextResponse.redirect(new URL(redirect, request.url));
-
-    response.cookies.set('accessToken', newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 15,
-      path: '/',
+    response.cookies.set('refreshToken', tokens.refreshToken, {
+      ...AUTH_CONFIG.cookieOptions,
+      maxAge: AUTH_CONFIG.refreshTokenExpiresIn,
     });
 
     return response;
   } catch (error) {
-    console.error('Erro no refresh:', error);
-    return NextResponse.redirect(new URL('/login', request.url));
+    console.error('Refresh Error', error);
+    return handleAuthFailure(request);
   }
+}
+
+function handleAuthFailure(request: NextRequest) {
+  const response = NextResponse.redirect(new URL('/login', request.url));
+  response.cookies.delete('accessToken');
+  response.cookies.delete('refreshToken');
+  return response;
 }
