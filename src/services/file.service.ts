@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { s3Client } from '@/lib/s3';
-import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { response } from '@/lib/http/response';
 import { apiHandler } from '@/lib/http/api-handler';
 import { UserHandler } from '@/types/user.types';
@@ -58,7 +58,37 @@ export const FileService = {
 
       return { bytes, file };
     } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
       throw new AppError('Error fetching file', 500);
+    }
+  },
+
+  async deleteFromBucket(key: string) {
+    try {
+      await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: 'training-platform',
+          Key: key,
+        })
+      );
+    } catch (error) {
+      throw new AppError('Error deleting file from bucket', 500);
+    }
+  },
+
+  async deleteFile(key: string) {
+    try {
+      await this.getFile(key);
+      await prisma.file.delete({
+        where: { key },
+      });
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Error deleting file', 500);
     }
   },
 };

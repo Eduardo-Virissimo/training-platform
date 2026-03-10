@@ -37,3 +37,15 @@ export const GET = apiHandler({
     });
   },
 });
+
+export const DELETE = apiHandler({
+  auth: true,
+  params: keyParamSchema,
+  handler: async ({ params }) => {
+    const key = params?.key;
+
+    FileService.deleteFile(key!);
+
+    return response.noContent();
+  },
+});
