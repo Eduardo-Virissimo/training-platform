@@ -20,6 +20,9 @@ model User {
   createdAt     DateTime       @default(now())
   refreshTokens RefreshToken[]
 
+  avatarFileId String?    @unique @db.VarChar(36)
+  avatarFile   FileUsage? @relation(fields: [avatarFileId], references: [id], onDelete: SetNull)
+
   trainings    UserTraining[]
   tracks       UserTrack[]
   quizAttempts QuizAttempt[]
@@ -43,7 +46,7 @@ model File {
   key       String     @unique
   size      Int
   userId    String     @db.VarChar(36)
-  uploader  User       @relation(fields: [userId], references: [id])
+  uploader  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime   @default(now())
   fileUsage FileUsage?
 }
@@ -54,14 +57,15 @@ model FileUsage {
   usageType FileUsageType
   usageId   String        @db.VarChar(36)
 
-  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  file  File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  users User?
 }
 
 enum FileUsageType {
   TRAINING
   TRACK
   QUIZ
-  USER
+  AVATAR
 }
 
 model Training {

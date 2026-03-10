@@ -1,10 +1,11 @@
 import { z } from 'zod';
-import { id } from 'zod/v4/locales';
 
 export const updateUserSchema = z.object({
   name: z.string().min(3).optional(),
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
+  icon: z.string().optional(),
+  removeIcon: z.boolean().optional(),
 });
 
 export const userFiltersSchema = z.object({

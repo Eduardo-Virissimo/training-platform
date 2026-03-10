@@ -4,7 +4,7 @@ import { response } from '@/lib/http/response';
 import { UserService } from '@/services/user.service';
 import { UserSearchFilters, UserUpdateData } from '@/types/user.types';
 import { apiHandler } from '@/lib/http/api-handler';
-import { updateUserSchema, userFiltersSchema, userParamsSchema } from '@/schemas/user.schema';
+import { updateUserSchema, userFiltersSchema } from '@/schemas/user.schema';
 import { Role } from '@prisma/client';
 import { idParamSchema } from '@/schemas/schemas';
 
@@ -12,7 +12,7 @@ export const GET = apiHandler({
   auth: true,
   params: userFiltersSchema,
   role: Role.ADMIN,
-  handler: async ({ req, params }) => {
+  handler: async ({ params }) => {
     const users = await UserService.read(params as UserSearchFilters);
 
     return response.ok(users);
@@ -24,7 +24,7 @@ export const PUT = apiHandler({
   params: idParamSchema,
   body: updateUserSchema,
   permissions: canManageUser,
-  handler: async ({ req, body, params }) => {
+  handler: async ({ body, params }) => {
     const id = params?.id;
     const updatedUser = await UserService.update(id!, body as UserUpdateData);
     return response.ok(updatedUser);

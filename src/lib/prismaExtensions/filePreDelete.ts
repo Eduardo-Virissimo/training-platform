@@ -9,7 +9,7 @@ export const filePreDelete = Prisma.defineExtension({
         if (file) {
           await FileService.deleteFromBucket(file.key!);
         }
-        return query(args);
+        return file;
       },
     },
   },
