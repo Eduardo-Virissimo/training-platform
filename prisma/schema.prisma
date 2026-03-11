@@ -19,7 +19,12 @@ model User {
   password      String
   role          Role           @default(USER)
   createdAt     DateTime       @default(now())
+  isBlocked     Boolean        @default(false)
+  blockedReason String?        @db.VarChar(500)
+  blockedAt     DateTime?
+
   refreshTokens RefreshToken[]
+  securityLogs  SecurityLog[]
 
   avatarFileId String?    @unique @db.VarChar(36)
   avatarFile   FileUsage? @relation(fields: [avatarFileId], references: [id], onDelete: SetNull)
@@ -34,9 +39,30 @@ model RefreshToken {
   id        String   @id @default(uuid()) @db.VarChar(36)
   token     String   @unique @db.VarChar(500)
   userId    String   @db.VarChar(36)
+  familyId  String   @db.VarChar(36)
+  fingerprint String? @db.VarChar(255)
+  isUsed    Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@index([familyId])
+  @@index([userId])
+}
+
+model SecurityLog {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  userId     String   @db.VarChar(36)
+  action     String   @db.VarChar(100)
+  detail     String?  @db.Text
+  ip         String?  @db.VarChar(45)
+  userAgent  String?  @db.VarChar(500)
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
 }
 
 model File {
