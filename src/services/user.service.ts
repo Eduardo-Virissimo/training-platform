@@ -51,6 +51,7 @@ export class UserService {
           name: data.name,
           email: data.email,
           password: data.password,
+          role: data.role,
           avatarFile: data.icon
             ? {
                 create: {

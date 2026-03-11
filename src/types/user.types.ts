@@ -12,6 +12,7 @@ export type UserUpdateData = {
   name?: string;
   email?: string;
   password?: string;
+  role: Role;
   icon?: string;
   removeIcon?: boolean;
   avatarFile?: unknown;
