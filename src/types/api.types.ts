@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { Role } from '@prisma/client';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { UserHandler } from './user.types';
 
 export type ApiResponse<T> = {
@@ -16,7 +16,7 @@ export type HandlerOptions<T, P> = {
   params?: z.ZodSchema<P>;
   permissions?: (ctx: PermissionContext) => boolean | Promise<boolean>;
   handler: (ctx: {
-    req: Request;
+    req: NextRequest;
     body?: T;
     user?: UserHandler;
     params?: P;

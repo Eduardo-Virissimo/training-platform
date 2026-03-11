@@ -5,9 +5,10 @@ import { checkRole } from '@/permissions/requireRole';
 import { HandlerOptions } from '@/types/api.types';
 import { ZodError } from 'zod';
 import { RateLimitError } from '@/errors/RateLimitError';
+import { NextRequest } from 'next/server';
 
 export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions<T, P>) {
-  return async (req: Request) => {
+  return async (req: NextRequest) => {
     try {
       let params = undefined;
 
@@ -46,7 +47,7 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
       }
 
       const result = await options.handler({
-        req,
+        req: req as NextRequest,
         body,
         params,
         user,
