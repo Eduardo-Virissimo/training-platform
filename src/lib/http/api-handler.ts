@@ -4,6 +4,7 @@ import { getUserFromSession } from '../auth';
 import { checkRole } from '@/permissions/requireRole';
 import { HandlerOptions } from '@/types/api.types';
 import { ZodError } from 'zod';
+import { RateLimitError } from '@/errors/RateLimitError';
 
 export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions<T, P>) {
   return async (req: Request) => {
@@ -53,6 +54,12 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
 
       return result;
     } catch (error) {
+      if (error instanceof RateLimitError) {
+        return response.error(error.message, error.statusCode, {
+          retryAfter: error.retryAfter,
+        });
+      }
+
       if (error instanceof AppError) {
         return response.error(error.message, error.statusCode);
       }
