@@ -36,7 +36,9 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
           throw new AppError('Unauthorized', 401);
         }
       }
-
+      if (options.permissions && user) {
+        options.permissions({ user, body, req });
+      }
       if (options.role && user) {
         checkRole(user.role, options.role);
       } else if (options.role && !user) {

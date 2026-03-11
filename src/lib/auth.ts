@@ -70,7 +70,7 @@ export async function getUserFromSession() {
 
   return prisma.user.findUnique({
     where: { id: session.id },
-    select: { id: true, email: true, name: true, role: true },
+    select: { id: true, email: true, name: true, role: true, avatarFile: true },
   });
 }
 
