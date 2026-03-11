@@ -6,6 +6,7 @@ export const updateUserSchema = z.object({
   password: z.string().min(6).optional(),
   icon: z.string().optional(),
   removeIcon: z.boolean().optional(),
+  role: z.enum(['ADMIN', 'USER']).optional(),
 });
 
 export const userFiltersSchema = z.object({
