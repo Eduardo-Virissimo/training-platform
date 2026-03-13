@@ -16,16 +16,16 @@
 
 @layer base {
   :root {
-    --background: 240 12% 94%;
+    --background: 240 80% 99%;
     --foreground: 240 12% 22%;
-    --card: 240 12% 94%;
+    --card: 200 80% 100%;
     --card-foreground: 240 12% 22%;
     --popover: 240 12% 94%;
     --popover-foreground: 240 12% 22%;
 
     /* Primary (Cool Sky) */
     --primary: 209 84% 67%;
-    --primary-foreground: 240 12% 22%;
+    --primary-foreground: 240 100% 100%;
 
     /* Secondary (Icy Blue) */
     --secondary: 208 67% 79%;
@@ -55,7 +55,7 @@
     --popover-foreground: 240 12% 94%;
 
     --primary: 209 84% 67%;
-    --primary-foreground: 240 12% 22%;
+    --primary-foreground: 240 12% 94%;
 
     --secondary: 212 39% 31%; /* Dusk Blue */
     --secondary-foreground: 240 12% 94%;
@@ -88,4 +88,6 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-sm: calc(var(--radius) * 0.6);
+
+  --font-secondary: 'Sono', monospace;
 }
