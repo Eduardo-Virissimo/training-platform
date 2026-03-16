@@ -13,3 +13,9 @@ export const updateTrainingSchema = z.object({
   content: z.string().optional(),
   trackId: z.string().uuid().optional(),
 });
+
+export const trainingFiltersSchema = z.object({
+  id: z.string().uuid().optional(),
+  title: z.string().optional(),
+  userId: z.string().uuid().optional(),
+});

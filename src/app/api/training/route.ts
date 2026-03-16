@@ -2,7 +2,7 @@ import { apiHandler } from '@/lib/http/api-handler';
 import { response } from '@/lib/http/response';
 import { canManageTraining } from '@/permissions/training.permission';
 import { idParamSchema } from '@/schemas/schemas';
-import { createTrainingSchema } from '@/schemas/training.schema';
+import { createTrainingSchema, trainingFiltersSchema } from '@/schemas/training.schema';
 import { TrainingService } from '@/services/training.service';
 import { createTraining } from '@/types/training.types';
 
@@ -48,10 +48,12 @@ export const DELETE = apiHandler({
 
 export const GET = apiHandler({
   auth: true,
-  params: idParamSchema,
+  params: trainingFiltersSchema,
   handler: async ({ req, user, params }) => {
     const id = params!.id;
-    const training = await TrainingService.getTrainingById(id);
+    const userId = params!.userId;
+
+    const training = await TrainingService.getTrainingByFilters(id, userId, user);
     return response.ok(training);
   },
 });

@@ -1,6 +1,7 @@
 import { AppError } from '@/errors/AppError';
 import { prisma } from '@/lib/prisma';
 import { createTraining } from '@/types/training.types';
+import { UserHandler } from '@/types/user.types';
 
 export const TrainingService = {
   async createTraining(data: createTraining) {
@@ -31,10 +32,27 @@ export const TrainingService = {
       },
     });
   },
-  async getTrainingById(id: string) {
+
+  async getTrainingByFilters(id?: string, userId?: string, user: UserHandler | null = null) {
+    if (userId && userId !== user?.id && user?.role !== 'ADMIN') {
+      throw new AppError('You are not allowed to access this training.', 403);
+    }
+    if (user?.role !== 'ADMIN') {
+      userId = user?.id;
+    }
+
     return await prisma.training
-      .findUnique({
-        where: { id },
+      .findMany({
+        where: {
+          id,
+          userTrainings: userId
+            ? {
+                some: {
+                  userId,
+                },
+              }
+            : undefined,
+        },
       })
       .catch(() => {
         throw new AppError('Training not found', 404);
