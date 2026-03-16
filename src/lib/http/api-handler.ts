@@ -38,8 +38,9 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
         }
       }
       if (options.permissions && user) {
-        options.permissions({ user, body, req });
+        await options.permissions({ user, body, req });
       }
+
       if (options.role && user) {
         checkRole(user.role, options.role);
       } else if (options.role && !user) {
