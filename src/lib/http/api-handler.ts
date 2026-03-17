@@ -5,9 +5,10 @@ import { checkRole } from '@/permissions/requireRole';
 import { HandlerOptions } from '@/types/api.types';
 import { ZodError } from 'zod';
 import { RateLimitError } from '@/errors/RateLimitError';
+import { NextRequest } from 'next/server';
 
 export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions<T, P>) {
-  return async (req: Request) => {
+  return async (req: NextRequest) => {
     try {
       let params = undefined;
 
@@ -37,8 +38,9 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
         }
       }
       if (options.permissions && user) {
-        options.permissions({ user, body, req });
+        await options.permissions({ user, body, req });
       }
+
       if (options.role && user) {
         checkRole(user.role, options.role);
       } else if (options.role && !user) {
@@ -46,7 +48,7 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
       }
 
       const result = await options.handler({
-        req,
+        req: req as NextRequest,
         body,
         params,
         user,
@@ -71,6 +73,7 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
 
         return response.error('Bad Request', 400, issueMessages);
       }
+      console.log(error);
 
       return response.error('Internal server error', 500);
     }

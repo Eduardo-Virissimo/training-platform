@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE `Training` MODIFY `content` LONGTEXT NULL;
+
+-- AlterTable
+ALTER TABLE `User` MODIFY `role` ENUM('USER', 'ADMIN', 'INSTRUCTOR') NOT NULL DEFAULT 'USER';
+
+-- AlterTable
+ALTER TABLE `UserTraining` ADD COLUMN `role` ENUM('STUDENT', 'INSTRUCTOR') NOT NULL DEFAULT 'STUDENT';
