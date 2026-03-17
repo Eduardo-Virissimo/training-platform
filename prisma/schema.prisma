@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   USER
   ADMIN
+  INSTRUCTOR
 }
 
 model User {
@@ -99,7 +100,7 @@ model Training {
   id          String  @id @default(uuid()) @db.VarChar(36)
   title       String
   description String?
-  content     String  @db.LongText
+  content     String?  @db.LongText
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -119,7 +120,7 @@ model Track {
   userTracks UserTrack[]
   quizTracks QuizTrack[]
 }
-
+ 
 model TrackTraining {
   trackId    String @db.VarChar(36)
   trainingId String @db.VarChar(36)
@@ -132,6 +133,11 @@ model TrackTraining {
   @@id([trackId, trainingId])
 }
 
+enum UserTrainingRole {
+  STUDENT
+  INSTRUCTOR
+}
+
 model UserTraining {
   id          String    @id @default(uuid()) @db.VarChar(36)
   userId      String    @db.VarChar(36)
@@ -139,6 +145,7 @@ model UserTraining {
   status      String
   startedAt   DateTime?
   completedAt DateTime?
+  role        UserTrainingRole @default(STUDENT)
 
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   training Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)

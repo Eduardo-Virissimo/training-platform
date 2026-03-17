@@ -21,7 +21,7 @@ export const TrackUserService = {
           role: 'STUDENT',
         },
       });
-      const track = await TrackService.search({ id: trackId });
+      const track = await TrackService.getById(trackId);
 
       return track;
     } catch (error) {

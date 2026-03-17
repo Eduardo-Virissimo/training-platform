@@ -2,6 +2,7 @@ import { AppError } from '@/errors/AppError';
 import { prisma } from '../lib/prisma';
 import { TrackCreateData, TrackSearchFilters, TrackUpdateData } from '@/types/api.types';
 import { Prisma } from '@prisma/client';
+import { UserHandler } from '@/types/user.types';
 
 export class TrackService {
   static async create(data: TrackCreateData) {
@@ -53,14 +54,35 @@ export class TrackService {
     }
   }
 
-  static async search(filters: TrackSearchFilters) {
+  static async search(filters: TrackSearchFilters, user: UserHandler) {
     try {
       const tracks = await prisma.track.findMany({
-        where: filters,
+        where: {
+          ...filters,
+          userTracks: {
+            some: {
+              userId: user.id,
+            },
+          },
+        },
       });
       return tracks;
     } catch (error) {
       throw new AppError('Failed to search tracks', 500);
+    }
+  }
+
+  static async getById(id: string) {
+    try {
+      const track = await prisma.track.findUnique({
+        where: { id },
+      });
+      return track;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new AppError('Track not found', 404);
+      }
+      throw new AppError('Failed to get track', 500);
     }
   }
 }
