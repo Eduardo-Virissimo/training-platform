@@ -3,15 +3,15 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   email: z
     .string()
-    .nonempty('Email is required.')
-    .email('Invalid email format.')
+    .nonempty('Email é obrigatório.')
+    .email('Formato de email inválido.')
     .trim()
     .toLowerCase(),
   password: z
     .string()
-    .nonempty('Password is required.')
-    .min(6, 'Password must be at least 6 characters long.')
-    .max(100, 'Password must be at most 100 characters long.'),
+    .nonempty('Senha é obrigatório.')
+    .min(6, 'Senha deve ter pelo menos 6 caracteres.')
+    .max(100, 'Senha deve ter no máximo 100 caracteres.'),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -20,28 +20,28 @@ export const registerSchema = z
   .object({
     name: z
       .string()
-      .nonempty('Name is required.')
-      .min(2, 'Name must be at least 2 characters long.')
-      .max(100, 'Name must be at most 100 characters long.'),
+      .nonempty('Nome é obrigatório.')
+      .min(2, 'Nome deve ter pelo menos 2 caracteres.')
+      .max(100, 'Nome deve ter no máximo 100 caracteres.'),
     email: z
       .string()
-      .nonempty('Email is required.')
-      .email('Invalid email format.')
+      .nonempty('Email é obrigatório.')
+      .email('Formato de email inválido.')
       .trim()
       .toLowerCase(),
     password: z
       .string()
-      .nonempty('Password is required.')
-      .min(6, 'Password must be at least 6 characters long.')
-      .max(100, 'Password must be at most 100 characters long.'),
-    confirmPassword: z.string().nonempty('Confirm Password is required.'),
+      .nonempty('Senha é obrigatória.')
+      .min(6, 'Senha deve ter pelo menos 6 caracteres.')
+      .max(100, 'Senha deve ter no máximo 100 caracteres.'),
+    confirmPassword: z.string().nonempty('Confirme sua senha.'),
   })
   .superRefine(({ password, confirmPassword }, ctx) => {
     if (password !== confirmPassword) {
       return ctx.addIssue({
         path: ['confirmPassword'],
-        code: z.ZodIssueCode.custom,
-        message: 'Passwords do not match.',
+        code: 'custom',
+        message: 'As senhas não coincidem.',
       });
     }
   });
