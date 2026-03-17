@@ -25,7 +25,7 @@ export const GET = apiHandler({
   auth: true,
   params: trackFiltersSchema,
   handler: async ({ req, params, user }) => {
-    const tracks = await TrackService.search(params as TrackSearchFilters, user);
+    const tracks = await TrackService.search(params as TrackSearchFilters, user!);
 
     return response.ok(tracks);
   },
