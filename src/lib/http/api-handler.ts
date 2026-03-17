@@ -73,6 +73,7 @@ export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions
 
         return response.error('Bad Request', 400, issueMessages);
       }
+      console.log(error);
 
       return response.error('Internal server error', 500);
     }

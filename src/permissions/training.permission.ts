@@ -40,3 +40,28 @@ export async function canManageTraining(ctx: PermissionContext): Promise<boolean
     throw new AppError('An error occurred while checking permissions', 500);
   }
 }
+
+export async function canViewTraining(ctx: PermissionContext): Promise<boolean> {
+  try {
+    const { searchParams } = new URL(ctx.req.url);
+    const id = searchParams.get('id');
+
+    await prisma.training
+      .findFirstOrThrow({
+        where: {
+          id: id!,
+          tracks: { some: { track: { userTracks: { some: { userId: ctx.user.id } } } } },
+        },
+      })
+      .catch((e) => {
+        throw new AppError('You are not allowed to view this training', 403);
+      });
+
+    return true;
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError('An error occurred while checking permissions', 500);
+  }
+}
