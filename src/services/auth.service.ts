@@ -3,11 +3,11 @@ import bcrypt from 'bcryptjs';
 import { createAccessToken, createRefreshToken } from '@/lib/auth';
 import { AppError } from '@/errors/AppError';
 import { LoginInput } from '@/schemas/auth.schema';
-import { resetBruteForce } from '@/lib/redis/rate-limit';
+import { resetLoginRateLimit } from '@/lib/redis/rate-limit';
 
 export async function authenticateUser(
   { email, password }: LoginInput,
-  identifier: string,
+  ip: string,
   fingerprint: string
 ) {
   const user = await prisma.user.findUnique({ where: { email } });
@@ -20,7 +20,7 @@ export async function authenticateUser(
     throw new AppError('Blocked user because of suspicious activity', 403);
   }
 
-  await resetBruteForce(identifier);
+  await resetLoginRateLimit(email, ip);
 
   const accessToken = await createAccessToken({
     id: user.id,
@@ -34,7 +34,7 @@ export async function authenticateUser(
     data: {
       userId: user.id,
       action: 'LOGIN_SUCCESS',
-      ip: identifier.split(':')[0],
+      ip,
     },
   });
 

@@ -14,7 +14,7 @@ export type HandlerOptions<T, P> = {
   auth?: boolean;
   role?: Role;
   params?: z.ZodSchema<P>;
-  permissions?: (ctx: PermissionContext) => boolean | Promise<boolean>;
+  permissions?: (ctx: PermissionContext<P>) => boolean | Promise<boolean>;
   handler: (ctx: {
     req: NextRequest;
     body?: T;
@@ -23,10 +23,11 @@ export type HandlerOptions<T, P> = {
   }) => Promise<NextResponse>;
 };
 
-export type PermissionContext = {
+export type PermissionContext<P = unknown> = {
   user: UserHandler;
   body: unknown;
   req: Request;
+  params?: P;
 };
 
 export type TrackCreateData = {
