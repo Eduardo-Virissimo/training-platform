@@ -2,13 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { refreshSession, AUTH_CONFIG } from '@/lib/auth';
 import { getSafeRedirect } from '@/lib/url';
 import { generateFingerprint } from '@/lib/fingerprint';
+import { checkRefreshRateLimit } from '@/lib/redis/rate-limit';
+import { getClientIp, getUserAgent } from '@/lib/request-meta';
 
 export async function GET(request: NextRequest) {
   const currentRefreshToken = request.cookies.get('refreshToken')?.value;
-  const ip =
-    request.headers.get('x-forwarded-for') || request.headers.get('remote-addr') || '127.0.0.1';
-  const userAgent = request.headers.get('user-agent') || 'unknown';
+  const ip = getClientIp(request);
+  const userAgent = getUserAgent(request);
   const fingerprint = generateFingerprint(ip, userAgent);
+
+  const fetchSite = request.headers.get('sec-fetch-site');
+  if (fetchSite && fetchSite === 'cross-site') {
+    return handleAuthFailure(request);
+  }
+
+  const { allowed } = await checkRefreshRateLimit(ip);
+
+  if (!allowed) {
+    return handleAuthFailure(request);
+  }
 
   if (!currentRefreshToken) {
     return handleAuthFailure(request);
@@ -17,10 +29,6 @@ export async function GET(request: NextRequest) {
   const redirectPath = getSafeRedirect(
     request.nextUrl.searchParams.get('redirect') || '/dashboard'
   );
-
-  if (!currentRefreshToken) {
-    return handleAuthFailure(request);
-  }
 
   try {
     const tokens = await refreshSession(currentRefreshToken, fingerprint);

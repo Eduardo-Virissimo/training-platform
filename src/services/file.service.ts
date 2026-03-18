@@ -11,6 +11,8 @@ export const FileService = {
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}-${file.name}`;
 
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+
     const res = await s3Client.send(
       new PutObjectCommand({
         Bucket: 'training-platform',
@@ -22,7 +24,7 @@ export const FileService = {
     const filePrisma = await prisma.file.create({
       data: {
         filename: file.name,
-        path: `http://localhost:3000/api/file?key=${fileName}`,
+        path: `${appUrl}/api/file?key=${fileName}`,
         mimetype: file.type,
         size: file.size,
         key: fileName,

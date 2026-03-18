@@ -35,9 +35,8 @@ export const DELETE = apiHandler({
   auth: true,
   params: idParamSchema,
   permissions: canManageUser,
-  handler: async ({ req }) => {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+  handler: async ({ params }) => {
+    const id = params?.id;
 
     await UserService.delete(id!);
     return response.noContent();
