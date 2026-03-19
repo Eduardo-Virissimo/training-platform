@@ -16,34 +16,23 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
-export const registerSchema = z
-  .object({
-    name: z
-      .string()
-      .nonempty('Nome é obrigatório.')
-      .min(2, 'Nome deve ter pelo menos 2 caracteres.')
-      .max(100, 'Nome deve ter no máximo 100 caracteres.'),
-    email: z
-      .string()
-      .nonempty('Email é obrigatório.')
-      .email('Formato de email inválido.')
-      .trim()
-      .toLowerCase(),
-    password: z
-      .string()
-      .nonempty('Senha é obrigatória.')
-      .min(6, 'Senha deve ter pelo menos 6 caracteres.')
-      .max(100, 'Senha deve ter no máximo 100 caracteres.'),
-    confirmPassword: z.string().nonempty('Confirme sua senha.'),
-  })
-  .superRefine(({ password, confirmPassword }, ctx) => {
-    if (password !== confirmPassword) {
-      return ctx.addIssue({
-        path: ['confirmPassword'],
-        code: 'custom',
-        message: 'As senhas não coincidem.',
-      });
-    }
-  });
+export const registerSchema = z.object({
+  name: z
+    .string()
+    .nonempty('Nome é obrigatório.')
+    .min(2, 'Nome deve ter pelo menos 2 caracteres.')
+    .max(100, 'Nome deve ter no máximo 100 caracteres.'),
+  email: z
+    .string()
+    .nonempty('Email é obrigatório.')
+    .email('Formato de email inválido.')
+    .trim()
+    .toLowerCase(),
+  password: z
+    .string()
+    .nonempty('Senha é obrigatória.')
+    .min(6, 'Senha deve ter pelo menos 6 caracteres.')
+    .max(100, 'Senha deve ter no máximo 100 caracteres.'),
+});
 
 export type RegisterInput = z.infer<typeof registerSchema>;
