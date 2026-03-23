@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForm } from '@tanstack/react-form-nextjs';
@@ -12,6 +11,12 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import authIllustration from '@/assets/auth-illustration.png';
 import Image from 'next/image';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -88,9 +93,8 @@ export default function LoginPage() {
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
+                          <InputGroup>
+                            <InputGroupInput
                               id={field.name}
                               name={field.name}
                               value={field.state.value}
@@ -98,10 +102,12 @@ export default function LoginPage() {
                               onChange={(e) => field.handleChange(e.target.value)}
                               placeholder="seu@email.com"
                               aria-invalid={isInvalid}
-                              className="pl-10"
                             />
-                            {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                          </div>
+                            <InputGroupAddon>
+                              <Mail />
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
                         </Field>
                       );
                     }}
@@ -112,32 +118,30 @@ export default function LoginPage() {
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor={field.name}>Senha</FieldLabel>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
+                          <InputGroup>
+                            <InputGroupInput
                               id={field.name}
                               name={field.name}
-                              type="password"
+                              type={showPassword ? 'text' : 'password'}
                               value={field.state.value}
                               onBlur={field.handleBlur}
                               onChange={(e) => field.handleChange(e.target.value)}
                               placeholder="••••••••"
                               aria-invalid={isInvalid}
-                              className="pl-10"
                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                            >
+                            <InputGroupAddon>
+                              <Lock />
+                            </InputGroupAddon>
+
+                            <InputGroupButton onClick={() => setShowPassword(!showPassword)}>
                               {showPassword ? (
                                 <EyeOff className="h-4 w-4" />
                               ) : (
                                 <Eye className="h-4 w-4" />
                               )}
-                            </button>
-                            {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                          </div>
+                            </InputGroupButton>
+                          </InputGroup>
+                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
                         </Field>
                       );
                     }}
