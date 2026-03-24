@@ -7,11 +7,11 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { FieldGroup, Field, FieldLabel, FieldError } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
 import { useForm } from '@tanstack/react-form-nextjs';
 import { RegisterInput, registerSchema } from '@/schemas/auth.schema';
 import authIllustration from '@/assets/auth-illustration.png';
 import Image from 'next/image';
+import { InputGroup, InputGroupInput } from '@/components/ui/input-group';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -101,15 +101,17 @@ export default function RegisterPage() {
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor={field.name}>Nome completo</FieldLabel>
-                          <Input
-                            id={field.name}
-                            name={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            placeholder="Seu nome"
-                            aria-invalid={isInvalid}
-                          />
+                          <InputGroup>
+                            <InputGroupInput
+                              id={field.name}
+                              name={field.name}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="Seu nome"
+                              aria-invalid={isInvalid}
+                            />
+                          </InputGroup>
                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
                         </Field>
                       );
@@ -121,15 +123,17 @@ export default function RegisterPage() {
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                          <Input
-                            id={field.name}
-                            name={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            placeholder="seu@email.com"
-                            aria-invalid={isInvalid}
-                          />
+                          <InputGroup>
+                            <InputGroupInput
+                              id={field.name}
+                              name={field.name}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="seu@email.com"
+                              aria-invalid={isInvalid}
+                            />
+                          </InputGroup>
                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
                         </Field>
                       );
@@ -141,16 +145,18 @@ export default function RegisterPage() {
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor={field.name}>Senha</FieldLabel>
-                          <Input
-                            id={field.name}
-                            name={field.name}
-                            type="password"
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            placeholder="••••••••"
-                            aria-invalid={isInvalid}
-                          />
+                          <InputGroup>
+                            <InputGroupInput
+                              id={field.name}
+                              name={field.name}
+                              type="password"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="••••••••"
+                              aria-invalid={isInvalid}
+                            />
+                          </InputGroup>
                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
                         </Field>
                       );
@@ -162,16 +168,18 @@ export default function RegisterPage() {
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor={field.name}>Confirmar senha</FieldLabel>
-                          <Input
-                            id={field.name}
-                            name={field.name}
-                            type="password"
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            placeholder="••••••••"
-                            aria-invalid={isInvalid}
-                          />
+                          <InputGroup>
+                            <InputGroupInput
+                              id={field.name}
+                              name={field.name}
+                              type="password"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="••••••••"
+                              aria-invalid={isInvalid}
+                            />
+                          </InputGroup>
                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
                         </Field>
                       );
