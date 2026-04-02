@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { getErrorMessage } from '@/lib/error';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForm } from '@tanstack/react-form-nextjs';
 import { loginSchema } from '@/schemas/auth.schema';
@@ -51,7 +52,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error);
+        setError(getErrorMessage(data.error) || 'Erro ao efetuar login.');
         console.log(data.error);
         return;
       }

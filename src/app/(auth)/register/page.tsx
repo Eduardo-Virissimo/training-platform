@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { getErrorMessage } from '@/lib/error';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { FieldGroup, Field, FieldLabel, FieldError } from '@/components/ui/field';
 import { useForm } from '@tanstack/react-form-nextjs';
@@ -60,7 +61,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error.message || 'Erro ao criar conta.');
+        setError(getErrorMessage(data.error) || 'Erro ao criar conta.');
         return;
       }
 
