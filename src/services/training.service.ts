@@ -10,10 +10,10 @@ export const TrainingService = {
         title: data.title,
         description: data.description,
         content: data.content,
-        tracks: data.trackId
+        modules: data.moduleId
           ? {
               create: {
-                trackId: data.trackId,
+                moduleId: data.moduleId,
                 position: 0,
               },
             }
@@ -77,6 +77,22 @@ export const TrainingService = {
           title: data.title,
           description: data.description,
           content: data.content,
+          modules: data.moduleId
+            ? {
+                connectOrCreate: {
+                  where: {
+                    moduleId_trainingId: {
+                      moduleId: data.moduleId,
+                      trainingId: id,
+                    },
+                  },
+                  create: {
+                    moduleId: data.moduleId,
+                    position: 0,
+                  },
+                },
+              }
+            : undefined,
         },
       })
       .catch(() => {
