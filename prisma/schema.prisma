@@ -105,7 +105,7 @@ model Training {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tracks        TrackTraining[]
+  modules       ModuleTraining[]
   userTrainings UserTraining[]
 }
 
@@ -116,21 +116,36 @@ model Track {
 
   createdAt DateTime @default(now())
 
-  trainings  TrackTraining[]
+  modules    Module[]
   userTracks UserTrack[]
-  quizTracks QuizTrack[]
 }
- 
-model TrackTraining {
-  trackId    String @db.VarChar(36)
+
+model Module {
+  id          String @id @default(uuid()) @db.VarChar(36)
+  trackId     String @db.VarChar(36)
+  title       String
+  description String?
+  position    Int
+
+  createdAt DateTime @default(now())
+
+  track     Track            @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  trainings ModuleTraining[]
+  quizzes   ModuleQuiz[]
+
+  @@index([trackId])
+}
+
+model ModuleTraining {
+  moduleId   String @db.VarChar(36)
   trainingId String @db.VarChar(36)
 
   position Int
 
-  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  module   Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   training Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
 
-  @@id([trackId, trainingId])
+  @@id([moduleId, trainingId])
 }
 
 enum UserTrainingRole {
@@ -179,16 +194,16 @@ model UserTrack {
   @@unique([userId, trackId])
 }
 
-model QuizTrack {
-  trackId String @db.VarChar(36)
-  quizId  String @db.VarChar(36)
+model ModuleQuiz {
+  moduleId String @db.VarChar(36)
+  quizId   String @db.VarChar(36)
 
   position Int
 
-  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  quiz  Quiz  @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-  @@id([trackId, quizId])
+  @@id([moduleId, quizId])
 }
 
 model Quiz {
@@ -198,7 +213,7 @@ model Quiz {
 
   createdAt DateTime @default(now())
 
-  quizTracks QuizTrack[]
+  modules   ModuleQuiz[]
   questions  Question[]
   attempts   QuizAttempt[]
 }

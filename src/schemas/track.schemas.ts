@@ -9,4 +9,5 @@ export const createTrackSchema = z.object({
 export const trackFiltersSchema = z.object({
   title: z.string().optional(),
   id: z.string().optional(),
+  userId: z.string().uuid().optional(),
 });

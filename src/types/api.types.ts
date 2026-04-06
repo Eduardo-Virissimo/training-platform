@@ -45,3 +45,22 @@ export type TrackSearchFilters = {
   id?: string;
   title?: string;
 };
+
+export type ModuleCreateData = {
+  title: string;
+  description?: string;
+  trackId: string;
+  position?: number;
+};
+
+export type ModuleUpdateData = {
+  title?: string;
+  description?: string;
+  position?: number;
+};
+
+export type ModuleSearchFilters = {
+  id?: string;
+  trackId?: string;
+  title?: string;
+};

@@ -2,6 +2,6 @@ export type createTraining = {
   title: string;
   description?: string;
   content?: string;
-  trackId: string;
+  moduleId?: string;
   userId: string;
 };

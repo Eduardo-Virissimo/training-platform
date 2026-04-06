@@ -49,10 +49,12 @@ export async function canViewTraining(ctx: PermissionContext): Promise<boolean> 
       .findFirstOrThrow({
         where: {
           id: id!,
-          tracks: { some: { track: { userTracks: { some: { userId: ctx.user.id } } } } },
+          modules: {
+            some: { module: { track: { userTracks: { some: { userId: ctx.user.id } } } } },
+          },
         },
       })
-      .catch((e) => {
+      .catch(() => {
         throw new AppError('You are not allowed to view this training', 403);
       });
 
