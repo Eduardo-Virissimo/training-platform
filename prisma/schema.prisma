@@ -256,6 +256,7 @@ model QuizAttempt {
 
   score  Float
   passed Boolean
+  completedAt DateTime?
 
   createdAt DateTime @default(now())
 
