@@ -51,8 +51,10 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error);
-        console.log(data.error);
+        const message =
+          (data && data.error && typeof data.error.message === 'string' && data.error.message) ||
+          'Falha ao realizar login.';
+        setError(message);
         return;
       }
 

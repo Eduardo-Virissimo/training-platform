@@ -60,7 +60,10 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error.message || 'Erro ao criar conta.');
+        const message =
+          (data && data.error && typeof data.error.message === 'string' && data.error.message) ||
+          'Erro ao criar conta.';
+        setError(message);
         return;
       }
 
