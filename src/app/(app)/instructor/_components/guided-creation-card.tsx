@@ -4,6 +4,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Circle,
+  Eye,
+  EyeOff,
   Link as LinkIcon,
   Paperclip,
   Plus,
@@ -19,6 +21,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+
+import { MarkdownPreview } from '@/components/ui/markdown-preview';
 
 import { Select } from './select';
 import type {
@@ -139,6 +143,8 @@ export function GuidedCreationCard({
     optionId: string;
   } | null>(null);
   const [dragOverOptionId, setDragOverOptionId] = useState<string | null>(null);
+
+  const [showMarkdownPreview, setShowMarkdownPreview] = useState(true);
 
   const handleQuestionDrop = (event: DragEvent, targetQuestionId: string) => {
     event.preventDefault();
@@ -355,16 +361,74 @@ export function GuidedCreationCard({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="training-content">Conteúdo</Label>
-                <Textarea
-                  id="training-content"
-                  placeholder="Texto da aula ou URL do vídeo"
-                  className="min-h-24"
-                  value={trainingForm.content}
-                  onChange={(e) =>
-                    setTrainingForm((prev) => ({ ...prev, content: e.target.value }))
-                  }
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="training-content">Conteúdo</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    onClick={() => setShowMarkdownPreview(!showMarkdownPreview)}
+                    className="flex items-center gap-2"
+                  >
+                    {showMarkdownPreview ? (
+                      <>
+                        <EyeOff className="size-3" />
+                        Ocultar preview
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="size-3" />
+                        Mostrar preview
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {showMarkdownPreview ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Editor (Markdown)</Label>
+                      <Textarea
+                        id="training-content"
+                        placeholder="Digite o conteúdo em markdown...
+Ex: # Título
+
+## Subtítulo
+
+- Item 1
+- Item 2
+
+**Texto em negrito** e *texto em itálico*"
+                        className="min-h-64 lg:min-h-80 font-mono text-sm"
+                        value={trainingForm.content}
+                        onChange={(e) =>
+                          setTrainingForm((prev) => ({ ...prev, content: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Preview</Label>
+                      <div className="border border-border/70 rounded-md p-4 min-h-64 lg:min-h-80 overflow-y-auto bg-background">
+                        <MarkdownPreview content={trainingForm.content} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Textarea
+                    id="training-content"
+                    placeholder="Texto da aula ou URL do vídeo (suporta markdown)"
+                    className="min-h-24"
+                    value={trainingForm.content}
+                    onChange={(e) =>
+                      setTrainingForm((prev) => ({ ...prev, content: e.target.value }))
+                    }
+                  />
+                )}
+
+                <p className="text-xs text-muted-foreground">
+                  Suporte completo a markdown. Use # para títulos, ** para negrito, * para itálico,
+                  - para listas, e mais.
+                </p>
               </div>
 
               <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
