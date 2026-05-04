@@ -1,15 +1,21 @@
 'use client';
 
 import { usePlatformState } from '@/hooks/use-platform-state';
-import { ArrowLeft } from 'lucide-react';
+import { useSnackbar } from '@/hooks/use-snackbar';
+import { SnackbarContainer } from '@/components/ui/snackbar';
+import { ArrowLeft, Edit2, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function ProfilePage() {
-  const { state, loading, error } = usePlatformState();
+  const { state, loading, error, refresh } = usePlatformState();
   const router = useRouter();
+  const { snackbars, showSnackbar, closeSnackbar } = useSnackbar();
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -21,6 +27,49 @@ export default function ProfilePage() {
       router.refresh();
     } finally {
       setLogoutLoading(false);
+    }
+  };
+
+  const handleEditName = () => {
+    if (!state) return;
+    setEditedName(state.user.name);
+    setIsEditingName(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingName(false);
+    setEditedName('');
+  };
+
+  const handleSaveName = async () => {
+    if (editedName.trim().length < 3) {
+      showSnackbar('Nome deve ter pelo menos 3 caracteres', 'warning');
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: editedName.trim() }),
+      });
+
+      if (response.ok) {
+        setIsEditingName(false);
+        showSnackbar('Nome atualizado com sucesso!', 'success');
+        // Atualizar os dados do usuário
+        await refresh();
+      } else {
+        const error = await response.json();
+        showSnackbar(error.message || 'Erro ao atualizar nome', 'error');
+      }
+    } catch (error) {
+      showSnackbar('Erro ao atualizar nome', 'error');
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -61,8 +110,46 @@ export default function ProfilePage() {
           <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-lg font-bold">
             {state.user.initials}
           </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">{state.user.name}</h1>
+          <div className="flex-1">
+            {isEditingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  className="text-xl font-bold tracking-tight bg-background border border-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary"
+                  disabled={updateLoading}
+                  autoFocus
+                />
+                <button
+                  onClick={handleSaveName}
+                  disabled={updateLoading}
+                  className="p-1 text-green-600 hover:text-green-700 disabled:opacity-60"
+                  title="Salvar"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  disabled={updateLoading}
+                  className="p-1 text-red-600 hover:text-red-700 disabled:opacity-60"
+                  title="Cancelar"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight">{state.user.name}</h1>
+                <button
+                  onClick={handleEditName}
+                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                  title="Editar nome"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">
               {state.user.role} - {state.user.department}
             </p>
@@ -93,6 +180,8 @@ export default function ProfilePage() {
           {logoutLoading ? 'Saindo...' : 'Sair da conta'}
         </button>
       </main>
+
+      <SnackbarContainer snackbars={snackbars} onClose={closeSnackbar} />
     </div>
   );
 }
