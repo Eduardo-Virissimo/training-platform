@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
+import { MarkdownPreview } from '@/components/ui/markdown-preview';
+
 export default function LessonPage() {
   const params = useParams<{ trailId: string; lessonId: string }>();
   const { state, loading, error, refresh } = usePlatformState();
@@ -107,9 +109,11 @@ export default function LessonPage() {
           </div>
         ) : (
           <article className="rounded-lg border border-border p-5 mb-8 bg-card">
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {lesson.content || 'Conteudo da aula ainda nao foi preenchido.'}
-            </p>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <MarkdownPreview
+                content={lesson.content || 'Conteúdo da aula ainda não foi preenchido.'}
+              />
+            </div>
           </article>
         )}
 
