@@ -3,8 +3,8 @@ import { Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 type StudioOverviewCardProps = {
-  error: string | null;
-  success: string | null;
+  error?: string | null;
+  success?: string | null;
 };
 
 export function StudioOverviewCard({ error, success }: StudioOverviewCardProps) {

@@ -2,12 +2,14 @@
 
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, FormEvent, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { SnackbarContainer } from '@/components/ui/snackbar';
+import { useSnackbar } from '@/hooks/use-snackbar';
 
 import { ContentStructureCard } from './_components/content-structure-card';
 import { GuidedCreationCard } from './_components/guided-creation-card';
@@ -42,8 +44,9 @@ export default function InstructorStudio() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
 
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { snackbars, showSnackbar, closeSnackbar } = useSnackbar();
+  const showSnackbarRef = useRef(showSnackbar);
+  showSnackbarRef.current = showSnackbar;
 
   const [trackForm, setTrackForm] = useState({ title: '', description: '' });
   const [moduleForm, setModuleForm] = useState({
@@ -113,7 +116,6 @@ export default function InstructorStudio() {
 
   const loadData = useCallback(async () => {
     try {
-      setError(null);
       setSyncing(true);
 
       const [trackData, moduleData, trainingData, quizData] = await Promise.all([
@@ -141,7 +143,10 @@ export default function InstructorStudio() {
         moduleId: prev.moduleId || moduleData[0]?.id || '',
       }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao carregar dados.');
+      showSnackbarRef.current(
+        err instanceof Error ? err.message : 'Falha ao carregar dados.',
+        'error'
+      );
     } finally {
       setSyncing(false);
       setLoading(false);
@@ -243,12 +248,10 @@ export default function InstructorStudio() {
   const runEntityAction = async (actionId: string, action: () => Promise<void>) => {
     try {
       setBusyActionId(actionId);
-      setError(null);
-      setSuccess(null);
       await action();
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao processar ação.');
+      showSnackbar(err instanceof Error ? err.message : 'Falha ao processar ação.', 'error');
     } finally {
       setBusyActionId(null);
     }
@@ -269,7 +272,7 @@ export default function InstructorStudio() {
 
   const saveTrackEdition = async (trackId: string) => {
     if (!trackEditForm.title.trim()) {
-      setError('Informe o título da trilha.');
+      showSnackbar('Informe o título da trilha.', 'error');
       return;
     }
 
@@ -284,7 +287,7 @@ export default function InstructorStudio() {
       });
 
       setEditingTrackId(null);
-      setSuccess('Trilha atualizada com sucesso.');
+      showSnackbar('Trilha atualizada com sucesso.', 'success');
     });
   };
 
@@ -299,7 +302,7 @@ export default function InstructorStudio() {
       });
 
       setEditingTrackId((prev) => (prev === trackId ? null : prev));
-      setSuccess('Trilha excluída com sucesso.');
+      showSnackbar('Trilha excluída com sucesso.', 'success');
     });
   };
 
@@ -314,7 +317,7 @@ export default function InstructorStudio() {
 
   const saveModuleEdition = async (moduleId: string) => {
     if (!moduleEditForm.title.trim()) {
-      setError('Informe o título do módulo.');
+      showSnackbar('Informe o título do módulo.', 'error');
       return;
     }
 
@@ -330,7 +333,7 @@ export default function InstructorStudio() {
       });
 
       setEditingModuleId(null);
-      setSuccess('Módulo atualizado com sucesso.');
+      showSnackbar('Módulo atualizado com sucesso.', 'success');
     });
   };
 
@@ -345,7 +348,7 @@ export default function InstructorStudio() {
       });
 
       setEditingModuleId((prev) => (prev === moduleId ? null : prev));
-      setSuccess('Módulo excluído com sucesso.');
+      showSnackbar('Módulo excluído com sucesso.', 'success');
     });
   };
 
@@ -389,7 +392,7 @@ export default function InstructorStudio() {
         )
       );
 
-      setSuccess('Ordem dos módulos atualizada com sucesso.');
+      showSnackbar('Ordem dos módulos atualizada com sucesso.', 'success');
     });
   };
 
@@ -404,7 +407,7 @@ export default function InstructorStudio() {
 
   const saveTrainingEdition = async (trainingId: string) => {
     if (!trainingEditForm.title.trim()) {
-      setError('Informe o título da aula.');
+      showSnackbar('Informe o título da aula.', 'error');
       return;
     }
 
@@ -420,7 +423,7 @@ export default function InstructorStudio() {
       });
 
       setEditingTrainingId(null);
-      setSuccess('Aula atualizada com sucesso.');
+      showSnackbar('Aula atualizada com sucesso.', 'success');
     });
   };
 
@@ -435,7 +438,7 @@ export default function InstructorStudio() {
       });
 
       setEditingTrainingId((prev) => (prev === trainingId ? null : prev));
-      setSuccess('Aula excluída com sucesso.');
+      showSnackbar('Aula excluída com sucesso.', 'success');
     });
   };
 
@@ -461,7 +464,7 @@ export default function InstructorStudio() {
 
   const saveQuizEdition = async (quizId: string) => {
     if (!quizEditForm.title.trim()) {
-      setError('Informe o título do quiz.');
+      showSnackbar('Informe o título do quiz.', 'error');
       return;
     }
 
@@ -479,19 +482,19 @@ export default function InstructorStudio() {
       .filter((question) => question.content.length > 0);
 
     if (normalizedQuestions.length === 0) {
-      setError('Adicione ao menos uma pergunta no quiz.');
+      showSnackbar('Adicione ao menos uma pergunta no quiz.', 'error');
       return;
     }
 
     for (const question of normalizedQuestions) {
       if (question.options.length < 2) {
-        setError('Cada pergunta precisa de ao menos 2 opções preenchidas.');
+        showSnackbar('Cada pergunta precisa de ao menos 2 opções preenchidas.', 'error');
         return;
       }
 
       const correctCount = question.options.filter((option) => option.isCorrect).length;
       if (correctCount === 0) {
-        setError('Marque pelo menos uma alternativa correta em cada pergunta.');
+        showSnackbar('Marque pelo menos uma alternativa correta em cada pergunta.', 'error');
         return;
       }
 
@@ -499,8 +502,9 @@ export default function InstructorStudio() {
         (question.type === 'SINGLE_CHOICE' || question.type === 'TRUE_FALSE') &&
         correctCount !== 1
       ) {
-        setError(
-          'Perguntas de escolha única/Verdadeiro ou Falso devem ter somente uma opção correta.'
+        showSnackbar(
+          'Perguntas de escolha única/Verdadeiro ou Falso devem ter somente uma opção correta.',
+          'error'
         );
         return;
       }
@@ -519,7 +523,7 @@ export default function InstructorStudio() {
       });
 
       setEditingQuizId(null);
-      setSuccess('Quiz atualizado com sucesso.');
+      showSnackbar('Quiz atualizado com sucesso.', 'success');
     });
   };
 
@@ -534,7 +538,7 @@ export default function InstructorStudio() {
       });
 
       setEditingQuizId((prev) => (prev === quizId ? null : prev));
-      setSuccess('Quiz excluído com sucesso.');
+      showSnackbar('Quiz excluído com sucesso.', 'success');
     });
   };
 
@@ -542,14 +546,12 @@ export default function InstructorStudio() {
     event.preventDefault();
 
     if (!trackForm.title.trim()) {
-      setError('Informe o título da trilha.');
+      showSnackbar('Informe o título da trilha.', 'error');
       return;
     }
 
     try {
       setSubmitting((prev) => ({ ...prev, track: true }));
-      setError(null);
-      setSuccess(null);
 
       const created = await apiRequest<TrackItem>('/api/track', {
         method: 'POST',
@@ -562,11 +564,11 @@ export default function InstructorStudio() {
 
       setTrackForm({ title: '', description: '' });
       setModuleForm((prev) => ({ ...prev, trackId: created.id }));
-      setSuccess('Trilha criada com sucesso.');
+      showSnackbar('Trilha criada com sucesso.', 'success');
       setActiveTab('module');
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao criar trilha.');
+      showSnackbar(err instanceof Error ? err.message : 'Falha ao criar trilha.', 'error');
     } finally {
       setSubmitting((prev) => ({ ...prev, track: false }));
     }
@@ -576,19 +578,17 @@ export default function InstructorStudio() {
     event.preventDefault();
 
     if (!moduleForm.trackId) {
-      setError('Selecione a trilha do módulo.');
+      showSnackbar('Selecione a trilha do módulo.', 'error');
       return;
     }
 
     if (!moduleForm.title.trim()) {
-      setError('Informe o título do módulo.');
+      showSnackbar('Informe o título do módulo.', 'error');
       return;
     }
 
     try {
       setSubmitting((prev) => ({ ...prev, module: true }));
-      setError(null);
-      setSuccess(null);
 
       const created = await apiRequest<ModuleItem>('/api/module', {
         method: 'POST',
@@ -609,11 +609,11 @@ export default function InstructorStudio() {
       }));
       setTrainingForm((prev) => ({ ...prev, moduleId: created.id }));
       setQuizForm((prev) => ({ ...prev, moduleId: created.id }));
-      setSuccess('Módulo criado com sucesso.');
+      showSnackbar('Módulo criado com sucesso.', 'success');
       setActiveTab('training');
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao criar módulo.');
+      showSnackbar(err instanceof Error ? err.message : 'Falha ao criar módulo.', 'error');
     } finally {
       setSubmitting((prev) => ({ ...prev, module: false }));
     }
@@ -623,19 +623,17 @@ export default function InstructorStudio() {
     event.preventDefault();
 
     if (!trainingForm.moduleId) {
-      setError('Selecione o módulo da aula.');
+      showSnackbar('Selecione o módulo da aula.', 'error');
       return;
     }
 
     if (!trainingForm.title.trim()) {
-      setError('Informe o título da aula.');
+      showSnackbar('Informe o título da aula.', 'error');
       return;
     }
 
     try {
       setSubmitting((prev) => ({ ...prev, training: true }));
-      setError(null);
-      setSuccess(null);
 
       await apiRequest('/api/training', {
         method: 'POST',
@@ -649,11 +647,11 @@ export default function InstructorStudio() {
       });
 
       setTrainingForm((prev) => ({ ...prev, title: '', description: '', content: '' }));
-      setSuccess('Aula criada com sucesso.');
+      showSnackbar('Aula criada com sucesso.', 'success');
       setActiveTab('quiz');
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao criar aula.');
+      showSnackbar(err instanceof Error ? err.message : 'Falha ao criar aula.', 'error');
     } finally {
       setSubmitting((prev) => ({ ...prev, training: false }));
     }
@@ -662,8 +660,6 @@ export default function InstructorStudio() {
   const handleUploadTrainingFile = async (file: File) => {
     try {
       setUploadingTrainingFile(true);
-      setError(null);
-      setSuccess(null);
 
       const formData = new FormData();
       formData.append('file', file);
@@ -674,9 +670,9 @@ export default function InstructorStudio() {
       });
 
       setUploadedTrainingFiles((prev) => [uploaded, ...prev]);
-      setSuccess(`Arquivo "${uploaded.filename}" enviado com sucesso.`);
+      showSnackbar(`Arquivo "${uploaded.filename}" enviado com sucesso.`, 'success');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao enviar arquivo.');
+      showSnackbar(err instanceof Error ? err.message : 'Falha ao enviar arquivo.', 'error');
     } finally {
       setUploadingTrainingFile(false);
     }
@@ -693,7 +689,7 @@ export default function InstructorStudio() {
         content: nextContent,
       };
     });
-    setSuccess(`Link do arquivo "${file.filename}" inserido no conteúdo.`);
+    showSnackbar(`Link do arquivo "${file.filename}" inserido no conteúdo.`, 'success');
   };
 
   const startModuleCreationFromTrack = (trackId: string) => {
@@ -841,16 +837,16 @@ export default function InstructorStudio() {
     });
   };
 
-  const submitQuiz = async (event: React.FormEvent) => {
+  const submitQuiz = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!quizForm.moduleId) {
-      setError('Selecione o módulo do quiz.');
+      showSnackbar('Selecione o módulo do quiz.', 'error');
       return;
     }
 
     if (!quizForm.title.trim()) {
-      setError('Informe o título do quiz.');
+      showSnackbar('Informe o título do quiz.', 'error');
       return;
     }
 
@@ -868,19 +864,19 @@ export default function InstructorStudio() {
       .filter((question) => question.content.length > 0);
 
     if (normalizedQuestions.length === 0) {
-      setError('Adicione ao menos uma pergunta no quiz.');
+      showSnackbar('Adicione ao menos uma pergunta no quiz.', 'error');
       return;
     }
 
     for (const question of normalizedQuestions) {
       if (question.options.length < 2) {
-        setError('Cada pergunta precisa de ao menos 2 opções preenchidas.');
+        showSnackbar('Cada pergunta precisa de ao menos 2 opções preenchidas.', 'error');
         return;
       }
 
       const correctCount = question.options.filter((option) => option.isCorrect).length;
       if (correctCount === 0) {
-        setError('Marque pelo menos uma alternativa correta em cada pergunta.');
+        showSnackbar('Marque pelo menos uma alternativa correta em cada pergunta.', 'error');
         return;
       }
 
@@ -888,8 +884,9 @@ export default function InstructorStudio() {
         (question.type === 'SINGLE_CHOICE' || question.type === 'TRUE_FALSE') &&
         correctCount !== 1
       ) {
-        setError(
-          'Perguntas de escolha única/Verdadeiro ou Falso devem ter somente uma opção correta.'
+        showSnackbar(
+          'Perguntas de escolha única/Verdadeiro ou Falso devem ter somente uma opção correta.',
+          'error'
         );
         return;
       }
@@ -897,8 +894,6 @@ export default function InstructorStudio() {
 
     try {
       setSubmitting((prev) => ({ ...prev, quiz: true }));
-      setError(null);
-      setSuccess(null);
 
       await apiRequest('/api/quiz', {
         method: 'POST',
@@ -914,15 +909,13 @@ export default function InstructorStudio() {
 
       setQuizForm((prev) => ({
         ...prev,
-        title: '',
-        description: '',
-        position: String(Number(prev.position || 0) + 1),
       }));
-      setQuizQuestions([createQuestion()]);
-      setSuccess('Quiz criado com sucesso.');
+
+      showSnackbar('Quiz criado com sucesso.', 'success');
+      setActiveTab('quiz');
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao criar quiz.');
+      showSnackbar(err instanceof Error ? err.message : 'Falha ao criar quiz.', 'error');
     } finally {
       setSubmitting((prev) => ({ ...prev, quiz: false }));
     }
@@ -962,7 +955,7 @@ export default function InstructorStudio() {
       </header>
 
       <main className="max-w-300 mx-auto px-6 py-8 space-y-6">
-        <StudioOverviewCard error={error} success={success} />
+        <StudioOverviewCard />
 
         <Tabs value={workspaceTab} onValueChange={(tab) => setWorkspaceTab(tab as WorkspaceTab)}>
           <TabsList className="w-full grid grid-cols-4" variant="line">
@@ -1102,6 +1095,8 @@ export default function InstructorStudio() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <SnackbarContainer snackbars={snackbars} onClose={closeSnackbar} />
     </div>
   );
 }
