@@ -101,6 +101,7 @@ export default function InstructorStudio() {
     title: '',
     description: '',
     position: '0',
+    questions: [],
   });
 
   const moduleById = useMemo(
@@ -444,6 +445,17 @@ export default function InstructorStudio() {
       title: quiz.title,
       description: quiz.description ?? '',
       position: String(quiz.modules?.[0]?.position ?? 0),
+      questions: quiz.questions.map((q) => ({
+        id: q.id,
+        content: q.content,
+        type: q.type as QuizQuestionForm['type'],
+        options:
+          q.options?.map((o) => ({
+            id: o.id,
+            content: o.content,
+            isCorrect: o.isCorrect ?? false,
+          })) ?? [],
+      })),
     });
   };
 
@@ -451,6 +463,47 @@ export default function InstructorStudio() {
     if (!quizEditForm.title.trim()) {
       setError('Informe o título do quiz.');
       return;
+    }
+
+    const normalizedQuestions = quizEditForm.questions
+      .map((question) => ({
+        content: question.content.trim(),
+        type: question.type,
+        options: question.options
+          .map((option) => ({
+            content: option.content.trim(),
+            isCorrect: option.isCorrect,
+          }))
+          .filter((option) => option.content.length > 0),
+      }))
+      .filter((question) => question.content.length > 0);
+
+    if (normalizedQuestions.length === 0) {
+      setError('Adicione ao menos uma pergunta no quiz.');
+      return;
+    }
+
+    for (const question of normalizedQuestions) {
+      if (question.options.length < 2) {
+        setError('Cada pergunta precisa de ao menos 2 opções preenchidas.');
+        return;
+      }
+
+      const correctCount = question.options.filter((option) => option.isCorrect).length;
+      if (correctCount === 0) {
+        setError('Marque pelo menos uma alternativa correta em cada pergunta.');
+        return;
+      }
+
+      if (
+        (question.type === 'SINGLE_CHOICE' || question.type === 'TRUE_FALSE') &&
+        correctCount !== 1
+      ) {
+        setError(
+          'Perguntas de escolha única/Verdadeiro ou Falso devem ter somente uma opção correta.'
+        );
+        return;
+      }
     }
 
     await runEntityAction(`quiz-update-${quizId}`, async () => {
@@ -461,6 +514,7 @@ export default function InstructorStudio() {
           title: quizEditForm.title.trim(),
           description: quizEditForm.description.trim() || undefined,
           position: Number(quizEditForm.position || 0),
+          questions: normalizedQuestions,
         }),
       });
 
@@ -647,6 +701,7 @@ export default function InstructorStudio() {
       ...prev,
       trackId,
     }));
+    setWorkspaceTab('create');
     setActiveTab('module');
   };
 
@@ -659,6 +714,7 @@ export default function InstructorStudio() {
       ...prev,
       moduleId,
     }));
+    setWorkspaceTab('create');
     setActiveTab('training');
   };
 
@@ -671,6 +727,7 @@ export default function InstructorStudio() {
       ...prev,
       moduleId,
     }));
+    setWorkspaceTab('create');
     setActiveTab('quiz');
   };
 

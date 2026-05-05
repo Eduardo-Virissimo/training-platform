@@ -126,6 +126,12 @@ export const QuizService = {
         }
 
         if (data.questions?.length) {
+          // Excluir todas as perguntas existentes
+          await tx.question.deleteMany({
+            where: { quizId: id },
+          });
+
+          // Criar as novas perguntas
           for (const question of data.questions) {
             await tx.question.create({
               data: {

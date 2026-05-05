@@ -40,7 +40,7 @@ import type {
 
 const quizTypeLabels: Record<QuizQuestionForm['type'], string> = {
   SINGLE_CHOICE: 'Única escolha',
-  MULTIPLE_CHOICE: 'Múltipla escolha',
+  MULTIPLE_CHOICE: 'Múltiplas respostas',
   TRUE_FALSE: 'Verdadeiro/Falso',
 };
 
