@@ -914,6 +914,7 @@ export default function InstructorStudio() {
       showSnackbar('Quiz criado com sucesso.', 'success');
       setActiveTab('quiz');
       await loadData();
+      setWorkspaceTab('structure');
     } catch (err) {
       showSnackbar(err instanceof Error ? err.message : 'Falha ao criar quiz.', 'error');
     } finally {
