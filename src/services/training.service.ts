@@ -26,7 +26,7 @@ export const TrainingService = {
               },
             },
             role: 'INSTRUCTOR',
-            status: 'COMPLETED',
+            status: 'PENDING',
           },
         },
       },

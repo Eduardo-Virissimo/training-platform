@@ -189,7 +189,7 @@ export class PlatformService {
                 title: moduleTraining.training.title,
                 type: inferLessonType(moduleTraining.training.content),
                 duration: estimateDuration(moduleTraining.training.content),
-                completed: normalizedStatus === 'COMPLETED' || Boolean(userTraining?.completedAt),
+                completed: normalizedStatus === 'COMPLETED',
                 content: moduleTraining.training.content,
               },
             };
@@ -526,7 +526,7 @@ export class PlatformService {
         totalLessons += 1;
         const userTraining = moduleTraining.training.userTrainings[0];
         const status = userTraining?.status?.toUpperCase();
-        if (status === 'COMPLETED' || Boolean(userTraining?.completedAt)) {
+        if (status === 'COMPLETED') {
           completedLessons += 1;
         }
       }

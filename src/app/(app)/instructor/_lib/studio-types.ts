@@ -99,6 +99,7 @@ export type QuizEditForm = {
   title: string;
   description: string;
   position: string;
+  questions: QuizQuestionForm[];
 };
 
 export type TrackForm = {

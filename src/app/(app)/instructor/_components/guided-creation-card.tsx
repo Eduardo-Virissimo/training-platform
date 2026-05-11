@@ -40,7 +40,7 @@ import type {
 
 const quizTypeLabels: Record<QuizQuestionForm['type'], string> = {
   SINGLE_CHOICE: 'Única escolha',
-  MULTIPLE_CHOICE: 'Múltipla escolha',
+  MULTIPLE_CHOICE: 'Múltiplas respostas',
   TRUE_FALSE: 'Verdadeiro/Falso',
 };
 
@@ -742,16 +742,18 @@ Ex: # Título
         </Tabs>
 
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={!previousStep}
-            onClick={() => previousStep && setActiveTab(previousStep.key)}
-          >
-            <ChevronLeft className="size-4" />
-            Etapa anterior
-          </Button>
+          {activeTab !== 'track' && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!previousStep}
+              onClick={() => previousStep && setActiveTab(previousStep.key)}
+            >
+              <ChevronLeft className="size-4" />
+              Etapa anterior
+            </Button>
+          )}
 
           <p className="text-xs text-muted-foreground">
             Etapa atual:{' '}
@@ -760,16 +762,18 @@ Ex: # Título
             </span>
           </p>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={!nextStep}
-            onClick={() => nextStep && setActiveTab(nextStep.key)}
-          >
-            Próxima etapa
-            <ChevronRight className="size-4" />
-          </Button>
+          {activeTab !== 'quiz' && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!nextStep}
+              onClick={() => nextStep && setActiveTab(nextStep.key)}
+            >
+              Próxima etapa
+              <ChevronRight className="size-4" />
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
