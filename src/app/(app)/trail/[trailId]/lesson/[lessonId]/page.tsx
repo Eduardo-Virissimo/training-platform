@@ -2,7 +2,8 @@
 
 import { completeLesson } from '@/lib/platform-api';
 import { usePlatformState } from '@/hooks/use-platform-state';
-import { ArrowLeft, CheckCircle2, ExternalLink } from 'lucide-react';
+import { useLessonFiles } from '@/hooks/use-lesson-files';
+import { ArrowLeft, CheckCircle2, ExternalLink, Image as ImageIcon, X } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -12,8 +13,16 @@ import { MarkdownPreview } from '@/components/ui/markdown-preview';
 export default function LessonPage() {
   const params = useParams<{ trailId: string; lessonId: string }>();
   const { state, loading, error, refresh } = usePlatformState();
+  const { images } = useLessonFiles(params.lessonId);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  type SelectedImage = {
+    src: string;
+    alt: string;
+    filename: string;
+  };
+
+  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
 
   const trail = useMemo(
     () => state?.tracks.find((item) => item.id === params.trailId),
@@ -115,6 +124,77 @@ export default function LessonPage() {
               />
             </div>
           </article>
+        )}
+
+        {/* Imagens da aula */}
+        {images.length > 0 && (
+          <div className="rounded-lg border border-border p-5 mb-8 bg-card">
+            <div className="flex items-center gap-2 mb-4">
+              <ImageIcon className="w-4 h-4" strokeWidth={1.5} />
+              <h3 className="text-sm font-medium">Imagens da aula</h3>
+            </div>
+            <div className="space-y-4">
+              {images.map((image) => (
+                <div key={image.id} className="group relative">
+                  <img
+                    src={image.path}
+                    alt={image.filename}
+                    className="w-full h-96 object-cover rounded-lg border border-border/50 transition-all duration-200 group-hover:shadow-md cursor-pointer"
+                    onClick={() =>
+                      setSelectedImage({
+                        src: image.path,
+                        alt: image.filename,
+                        filename: image.filename,
+                      })
+                    }
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <p className="text-xs text-white truncate">{image.filename}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Modal de Imagem */}
+            {selectedImage && (
+              <>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                  {/* Overlay preto 50% opacidade */}
+                  <div
+                    className="absolute inset-0 bg-black/50"
+                    onClick={() => setSelectedImage(null)}
+                  />
+
+                  {/* Conteúdo da modal */}
+                  <div className="relative z-10 w-full h-full max-w-7xl max-h-[95vh]">
+                    <div className="bg-white rounded-lg shadow-xl overflow-hidden h-full flex flex-col">
+                      {/* Header */}
+                      <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+                        <h3 className="text-lg font-medium text-gray-900 truncate">
+                          {selectedImage.filename}
+                        </h3>
+                        <button
+                          onClick={() => setSelectedImage(null)}
+                          className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+                        >
+                          <X className="w-5 h-5 text-gray-500" />
+                        </button>
+                      </div>
+
+                      {/* Imagem em tamanho maior */}
+                      <div className="p-4 bg-gray-50 flex-1 overflow-hidden">
+                        <img
+                          src={selectedImage.src}
+                          alt={selectedImage.alt}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         )}
 
         {submitError && <p className="text-sm text-destructive mb-4">{submitError}</p>}

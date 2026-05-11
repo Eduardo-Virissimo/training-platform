@@ -7,7 +7,7 @@ import { UserHandler } from '@/types/user.types';
 import { AppError } from '@/errors/AppError';
 
 export const FileService = {
-  async create(file: File, user: UserHandler) {
+  async create(file: File, user: UserHandler, trainingId?: string) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}-${file.name}`;
 
@@ -31,6 +31,17 @@ export const FileService = {
         userId: user.id,
       },
     });
+
+    // Se fornecido trainingId, criar associação FileUsage
+    if (trainingId) {
+      await prisma.fileUsage.create({
+        data: {
+          fileId: filePrisma.id,
+          usageType: 'TRAINING',
+          usageId: trainingId,
+        },
+      });
+    }
 
     return filePrisma;
   },

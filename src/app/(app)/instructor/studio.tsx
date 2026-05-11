@@ -664,6 +664,11 @@ export default function InstructorStudio() {
       const formData = new FormData();
       formData.append('file', file);
 
+      // Se estiver editando um treinamento, associar o arquivo a ele
+      if (editingTrainingId) {
+        formData.append('trainingId', editingTrainingId);
+      }
+
       const uploaded = await apiRequest<UploadedFileItem>('/api/file', {
         method: 'POST',
         body: formData,

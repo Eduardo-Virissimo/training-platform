@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TrainUp - Plataforma de Treinamentos Gamificados',
+  title: 'Skillquest - Plataforma de Treinamentos Gamificados',
   description: 'Plataforma gamificada para treinamentos corporativos obrigatorios',
 };
 

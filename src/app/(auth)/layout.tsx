@@ -5,7 +5,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {children}
 
         <p className="text-center align-bottom text-gray-500 text-xs">
-          © 2026 TrainUp — Treinamentos Gamificados
+          © 2026 Skillquest — Treinamentos Gamificados
         </p>
       </div>
     </div>

@@ -1,4 +1,4 @@
-# TrainUp — Plataforma de Treinamentos Gamificados
+# Skillquest — Plataforma de Treinamentos Gamificados
 
 Plataforma gamificada para treinamentos corporativos obrigatórios.
 
@@ -22,7 +22,7 @@ src/
   middleware.ts      → proteção de rotas
 ```
 
-## Como Rodar
+## Como Rodar Primeira vez
 
 ```bash
 # instalar dependências
@@ -38,7 +38,28 @@ npx prisma migrate dev --name init
 npm run dev
 ```
 
+## Como Rodar Continuamente
+
+```bash
+docker compose up -d
+
+# Conferir se o MySQL subiu
+docker ps
+
+# testar conexão
+mysql -u root -p -h 127.0.0.1 -P 3307
+
+# Se for primeira vez do dia ou depois de mudança:
+npx prisma generate
+
+# Se você alterou schema:
+npx prisma migrate dev
+
+# Rodar o projeto
+npm run dev
+
 ## Autenticação
 
 - **Access Token**: JWT com validade de 15 minutos (cookie httpOnly)
 - **Refresh Token**: token aleatório com validade de 7 dias (salvo no banco)
+```
