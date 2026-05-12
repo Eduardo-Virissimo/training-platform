@@ -15,9 +15,7 @@ export function StudioOverviewCard({ error, success }: StudioOverviewCardProps) 
           <Sparkles className="size-5 text-primary" />
           Studio do Instrutor
         </CardTitle>
-        <CardDescription>
-          Fluxo de criação simples, com etapas claras e sem ruído visual.
-        </CardDescription>
+        <CardDescription>Crie tudo o que você precisa para os seus treinamentos!</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-3 pt-0">
