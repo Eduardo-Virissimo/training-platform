@@ -11,8 +11,11 @@ export const POST = apiHandler({
   handler: async ({ req, user }) => {
     const formData = await req.formData();
     const file = formData.get('file') as File;
+    const trainingId = formData.get('trainingId') as string | null;
 
-    return response.ok(await FileService.create(file, user as UserHandler));
+    return response.ok(
+      await FileService.create(file, user as UserHandler, trainingId || undefined)
+    );
   },
 });
 

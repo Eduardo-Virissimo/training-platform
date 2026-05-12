@@ -51,8 +51,10 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error);
-        console.log(data.error);
+        const message =
+          (data && data.error && typeof data.error.message === 'string' && data.error.message) ||
+          'Falha ao realizar login.';
+        setError(message);
         return;
       }
 
@@ -186,13 +188,13 @@ export default function LoginPage() {
         </div>
 
         {/* Image Side - hidden on mobile */}
-        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-4">
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-4 bg-[#fdf8ed]">
           <Image
             src={authIllustration.src}
             alt="Ilustração de colaboração"
             width={500}
             height={800}
-            className="h-full w-full object-cover rounded-md"
+            className="h-full w-full object-contain rounded-md"
           />
         </div>
       </div>

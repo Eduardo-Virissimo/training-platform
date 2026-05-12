@@ -60,7 +60,10 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error.message || 'Erro ao criar conta.');
+        const message =
+          (data && data.error && typeof data.error.message === 'string' && data.error.message) ||
+          'Erro ao criar conta.';
+        setError(message);
         return;
       }
 
@@ -225,13 +228,13 @@ export default function RegisterPage() {
         </div>
 
         {/* Image Side - hidden on mobile */}
-        <div className="hidden lg:flex lg:w-1/2 h-full items-center justify-center p-4">
+        <div className="hidden lg:flex lg:w-1/2 h-full items-center justify-center p-4 bg-[##fdf8ed]">
           <Image
             src={authIllustration.src}
             alt="Ilustração de colaboração"
             width={500}
             height={800}
-            className="h-full w-full object-cover rounded-md"
+            className="h-full w-full object-contain rounded-md"
           />
         </div>
       </div>
