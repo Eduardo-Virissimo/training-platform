@@ -229,9 +229,7 @@ export function QuickManagementCard({
     <Card>
       <CardHeader className="border-b border-border/70 pb-4">
         <CardTitle>Gestão rápida</CardTitle>
-        <CardDescription>
-          Edição e exclusão de aulas e quizzes sem sair da área do instrutor.
-        </CardDescription>
+        <CardDescription>Edição e exclusão de aulas e quizzes.</CardDescription>
       </CardHeader>
       <CardContent className="pt-5 space-y-4">
         <div className="space-y-2">

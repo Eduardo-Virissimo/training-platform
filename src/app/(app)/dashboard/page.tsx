@@ -111,7 +111,9 @@ export default function DashboardPage() {
       <header className="border-b border-border">
         <div className="max-w-235 mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-primary" strokeWidth={1.5} />
+            <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+              <img src="/logo.png" alt="SkillQuest Logo" className="w-10" />
+            </div>
             <span className="font-semibold text-sm">SkillQuest</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -169,7 +171,7 @@ export default function DashboardPage() {
                   Próximos passos
                 </CardTitle>
                 <CardDescription>
-                  Foco no que está em andamento para avançar mais rápido.
+                  De foco no que está em andamento para avançar mais rápido!
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -201,7 +203,7 @@ export default function DashboardPage() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Trilhas disponíveis</CardTitle>
-                <CardDescription>Ativas e concluídas com acesso imediato.</CardDescription>
+                <CardDescription>Ativas e concluídas.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 {availableTracks.length === 0 ? (
@@ -216,12 +218,14 @@ export default function DashboardPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Trilhas bloqueadas</CardTitle>
                 <CardDescription>
-                  Conteúdos que serão liberados conforme seu progresso.
+                  Aqui você encontra conteúdos que serão liberados conforme seu progresso.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 {lockedTracks.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhuma trilha bloqueada 🎉</p>
+                  <p className="text-sm text-muted-foreground">
+                    Nenhuma trilha bloqueada no momento.
+                  </p>
                 ) : (
                   lockedTracks.map((trail) => <TrackRow key={trail.id} trail={trail} />)
                 )}
