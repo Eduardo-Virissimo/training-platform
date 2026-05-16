@@ -10,6 +10,10 @@ export async function apiRequest<T>(url: string, init?: RequestInit): Promise<T>
     throw new Error(payload?.error?.message || 'Falha ao comunicar com a API.');
   }
 
+  if (response.status === 204 || response.status === 205) {
+    return undefined as T;
+  }
+
   if (!payload?.data) {
     throw new Error('Resposta inválida da API.');
   }

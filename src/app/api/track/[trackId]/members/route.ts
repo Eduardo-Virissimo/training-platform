@@ -2,6 +2,8 @@ import { apiHandler } from '@/lib/http/api-handler';
 import { response } from '@/lib/http/response';
 import { getUserFromSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { canManageTrack } from '@/permissions/track.permissions';
+import { Role } from '@prisma/client';
 import { z } from 'zod';
 
 const getMembersSchema = z.object({
@@ -9,7 +11,10 @@ const getMembersSchema = z.object({
 });
 
 export const GET = apiHandler({
+  auth: true,
   params: getMembersSchema,
+  role: Role.INSTRUCTOR,
+  permissions: canManageTrack,
   handler: async ({ params }) => {
     if (!params) {
       return response.error('Parâmetros inválidos', 400);
@@ -23,6 +28,9 @@ export const GET = apiHandler({
     const members = await prisma.userTrack.findMany({
       where: {
         trackId: params.trackId,
+        NOT: {
+          userId: user.id,
+        },
       },
       include: {
         user: {

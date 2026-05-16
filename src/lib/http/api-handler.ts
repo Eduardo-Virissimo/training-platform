@@ -7,14 +7,32 @@ import { ZodError } from 'zod';
 import { RateLimitError } from '@/errors/RateLimitError';
 import { NextRequest } from 'next/server';
 
+type RouteHandlerContext = {
+  params?: Promise<Record<string, string | string[]>> | Record<string, string | string[]>;
+};
+
+function normalizeRouteParams(
+  raw: Record<string, string | string[]> | undefined
+): Record<string, string> {
+  if (!raw) return {};
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    out[key] = Array.isArray(value) ? (value[0] ?? '') : value;
+  }
+  return out;
+}
+
 export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions<T, P>) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest, context?: RouteHandlerContext) => {
     try {
       let params = undefined;
 
       if (options.params) {
         const { searchParams } = new URL(req.url);
-        const paramsObj: Record<string, string> = {};
+        const routeParams = normalizeRouteParams(
+          context?.params ? await Promise.resolve(context.params) : undefined
+        );
+        const paramsObj: Record<string, string> = { ...routeParams };
         for (const [key, value] of searchParams.entries()) {
           paramsObj[key] = value;
         }

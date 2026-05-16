@@ -2,9 +2,11 @@ import { prisma } from '@/lib/prisma';
 import { PermissionContext } from '@/types/api.types';
 import { AppError } from '@/errors/AppError';
 
-export async function canManageTrack(ctx: PermissionContext<{ id: string }>): Promise<boolean> {
+export async function canManageTrack(
+  ctx: PermissionContext<{ id?: string; trackId?: string }>
+): Promise<boolean> {
   try {
-    const id = ctx.params?.id;
+    const id = ctx.params?.id ?? ctx.params?.trackId;
 
     if (!id) {
       throw new AppError('Track ID is required', 400);
