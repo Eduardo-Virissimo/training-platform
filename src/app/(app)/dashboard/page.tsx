@@ -50,6 +50,11 @@ function TrackRow({ trail }: { trail: PlatformTrail }) {
           {trail.modules.length} módulos ·{' '}
           <span className="tabular-nums">+{trail.xp.toLocaleString('pt-BR')} XP</span>
         </p>
+        {isLocked && (
+          <p className="text-xs text-muted-foreground">
+            Complete a trilha anterior para desbloquear.
+          </p>
+        )}
       </div>
 
       {!isLocked && (

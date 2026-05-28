@@ -2,7 +2,7 @@
 
 import { AlertTriangle, Mail, UserMinus, Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { apiRequest } from '../_lib/studio-api';
+import { ApiError, apiRequest } from '../_lib/studio-api';
 import type { TrackItem } from '../_lib/studio-types';
 
 import { Button } from '@/components/ui/button';
@@ -129,10 +129,15 @@ export function TrackMembersModal({
       setFeedback({ type: 'success', text: 'Usuário adicionado à trilha.' });
       await loadMembers();
     } catch (e) {
-      setFeedback({
-        type: 'error',
-        text: e instanceof Error ? e.message : 'Falha ao adicionar membro.',
-      });
+      const text =
+        e instanceof ApiError && e.status === 404
+          ? 'Usuário não encontrado. Verifique o e-mail digitado.'
+          : e instanceof ApiError && e.status === 409
+            ? 'Este usuário já faz parte desta trilha.'
+            : e instanceof Error
+              ? e.message
+              : 'Falha ao adicionar membro.';
+      setFeedback({ type: 'error', text });
     } finally {
       setInviting(false);
     }
