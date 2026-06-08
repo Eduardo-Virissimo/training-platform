@@ -72,6 +72,20 @@ export type QuizAttemptCurrentResponse = {
   questions: QuizAttemptCurrentQuestion[];
 };
 
+export type RankingEntry = {
+  position: number;
+  userId: string;
+  name: string;
+  score: number;
+  isCurrentUser: boolean;
+};
+
+export type TrackRankingResponse = {
+  trackId: string;
+  total: number;
+  ranking: RankingEntry[];
+};
+
 export type QuizAttemptSubmitResponse =
   | {
       attemptId: string;
