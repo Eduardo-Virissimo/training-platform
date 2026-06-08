@@ -2,6 +2,7 @@ import {
   PlatformState,
   QuizAttemptCurrentResponse,
   QuizAttemptSubmitResponse,
+  TrackRankingResponse,
 } from '@/types/platform.types';
 
 type ApiEnvelope<T> = {
@@ -84,4 +85,17 @@ export async function submitQuizAnswer(optionId: string): Promise<QuizAttemptSub
   });
 
   return parseApiResponse<QuizAttemptSubmitResponse>(response);
+}
+
+export async function fetchTrackRanking(trackId: string, limit = 5): Promise<TrackRankingResponse> {
+  const query = new URLSearchParams({
+    limit: String(limit),
+  });
+
+  const response = await fetch(`/api/track/${trackId}/ranking?${query.toString()}`, {
+    method: 'GET',
+    cache: 'no-store',
+  });
+
+  return parseApiResponse<TrackRankingResponse>(response);
 }
