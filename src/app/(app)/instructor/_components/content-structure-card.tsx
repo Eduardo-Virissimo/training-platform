@@ -399,6 +399,7 @@ export function ContentStructureCard({
             setMembersModalOpen(false);
             setSelectedTrack(null);
           }}
+          trackId={selectedTrack.id}
           trackTitle={selectedTrack.title}
         />
       )}

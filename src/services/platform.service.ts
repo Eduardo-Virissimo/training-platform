@@ -4,7 +4,7 @@ import { QuizService } from '@/services/quiz.service';
 import { UserHandler } from '@/types/user.types';
 import { Role, UserTrackStatus, UserTrainingRole } from '@prisma/client';
 
-const XP_PER_COMPLETED_LESSON = 120;
+const XP_PER_COMPLETED_LESSON = 100;
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2);

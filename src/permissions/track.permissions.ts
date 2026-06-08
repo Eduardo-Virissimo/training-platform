@@ -2,9 +2,39 @@ import { prisma } from '@/lib/prisma';
 import { PermissionContext } from '@/types/api.types';
 import { AppError } from '@/errors/AppError';
 
-export async function canManageTrack(ctx: PermissionContext<{ id: string }>): Promise<boolean> {
+export async function canViewTrack(
+  ctx: PermissionContext<{ id?: string; trackId?: string }>
+): Promise<boolean> {
+  const id = ctx.params?.id ?? ctx.params?.trackId;
+
+  if (!id) {
+    throw new AppError('Track ID is required', 400);
+  }
+
+  if (ctx.user.role === 'ADMIN') {
+    return true;
+  }
+
+  const membership = await prisma.userTrack.findFirst({
+    where: {
+      trackId: id,
+      userId: ctx.user.id,
+    },
+    select: { id: true },
+  });
+
+  if (!membership) {
+    throw new AppError('You are not a member of this track', 403);
+  }
+
+  return true;
+}
+
+export async function canManageTrack(
+  ctx: PermissionContext<{ id?: string; trackId?: string }>
+): Promise<boolean> {
   try {
-    const id = ctx.params?.id;
+    const id = ctx.params?.id ?? ctx.params?.trackId;
 
     if (!id) {
       throw new AppError('Track ID is required', 400);

@@ -7,7 +7,10 @@ import { Prisma } from '@prisma/client';
 export const TrackUserService = {
   async addUserToTrack(trackId: string, email: string) {
     const user = await UserService.read({ email });
-    console.error('Error adding user to track:', trackId);
+
+    if (user.length === 0) {
+      throw new AppError('User not found', 404);
+    }
 
     try {
       await prisma.userTrack.create({

@@ -5,6 +5,7 @@ import { usePlatformState } from '@/hooks/use-platform-state';
 import { ArrowLeft, Check, ChevronRight, FileText, HelpCircle, Lock, Video } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { TrackRanking } from './_components/TrackRanking';
 
 export default function TrailPage() {
   const params = useParams<{ trailId: string }>();
@@ -56,6 +57,10 @@ export default function TrailPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight">{trail.title}</h1>
           <p className="text-sm text-muted-foreground mt-1">{trail.description}</p>
+        </div>
+
+        <div className="mb-8">
+          <TrackRanking trackId={params.trailId} />
         </div>
 
         <div className="space-y-6">
