@@ -1,5 +1,15 @@
 import type { ApiEnvelope } from './studio-types';
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 export async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   const payload = response.headers.get('content-type')?.includes('application/json')
@@ -7,7 +17,7 @@ export async function apiRequest<T>(url: string, init?: RequestInit): Promise<T>
     : null;
 
   if (!response.ok) {
-    throw new Error(payload?.error?.message || 'Falha ao comunicar com a API.');
+    throw new ApiError(payload?.error?.message || 'Falha ao comunicar com a API.', response.status);
   }
 
   if (response.status === 204 || response.status === 205) {
