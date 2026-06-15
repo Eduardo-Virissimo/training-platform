@@ -1,0 +1,99 @@
+import { AppError } from '@/errors/AppError';
+import { response } from '@/lib/http/response';
+import { getUserFromSession } from '../auth';
+import { checkRole } from '@/permissions/requireRole';
+import { HandlerOptions } from '@/types/api.types';
+import { ZodError } from 'zod';
+import { RateLimitError } from '@/errors/RateLimitError';
+import { NextRequest } from 'next/server';
+
+type RouteHandlerContext = {
+  params?: Promise<Record<string, string | string[]>> | Record<string, string | string[]>;
+};
+
+function normalizeRouteParams(
+  raw: Record<string, string | string[]> | undefined
+): Record<string, string> {
+  if (!raw) return {};
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    out[key] = Array.isArray(value) ? (value[0] ?? '') : value;
+  }
+  return out;
+}
+
+export function apiHandler<T = undefined, P = undefined>(options: HandlerOptions<T, P>) {
+  return async (req: NextRequest, context?: RouteHandlerContext) => {
+    try {
+      let params = undefined;
+
+      if (options.params) {
+        const { searchParams } = new URL(req.url);
+        const routeParams = normalizeRouteParams(
+          context?.params ? await Promise.resolve(context.params) : undefined
+        );
+        const paramsObj: Record<string, string> = { ...routeParams };
+        for (const [key, value] of searchParams.entries()) {
+          paramsObj[key] = value;
+        }
+        params = options.params.parse(paramsObj);
+      }
+
+      let body = undefined;
+
+      if (options.body) {
+        const json = await req.json();
+        body = options.body.parse(json);
+      }
+
+      let user = undefined;
+
+      if (options.auth) {
+        user = await getUserFromSession();
+
+        if (!user) {
+          throw new AppError('Unauthorized', 401);
+        }
+      }
+      if (options.permissions && user) {
+        await options.permissions({ user, body, req, params });
+      }
+
+      if (options.role && user) {
+        checkRole(user.role, options.role);
+      } else if (options.role && !user) {
+        throw new AppError('Unauthorized', 401);
+      }
+
+      const result = await options.handler({
+        req: req as NextRequest,
+        body,
+        params,
+        user,
+      });
+
+      return result;
+    } catch (error) {
+      if (error instanceof RateLimitError) {
+        return response.error(error.message, error.statusCode, {
+          retryAfter: error.retryAfter,
+        });
+      }
+
+      if (error instanceof AppError) {
+        return response.error(error.message, error.statusCode);
+      }
+
+      if (error instanceof ZodError) {
+        const issueMessages = error.issues.map(
+          (issue) => `${issue.path.join('.')} - ${issue.message}`
+        );
+
+        return response.error('Bad Request', 400, issueMessages);
+      }
+      console.log(error);
+
+      return response.error('Internal server error', 500);
+    }
+  };
+}

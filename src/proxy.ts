@@ -1,48 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
+import { jwtVerify } from 'jose';
 
-const publicRoutes = ['/login', '/register'];
+const authRoutes = ['/login', '/register'];
+const protectedRoutes = ['/dashboard'];
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const access = request.cookies.get('accessToken')?.value;
+  const refresh = request.cookies.get('refreshToken')?.value;
 
-  if (
-    pathname.startsWith('/api') ||
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon')
-  ) {
-    return NextResponse.next();
+  const session = access ? await verifyAccessToken(access) : null;
+  const isAuthenticated = !!session;
+
+  if (isAuthenticated && authRoutes.some((r) => pathname.startsWith(r))) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  const accessToken = request.cookies.get('accessToken')?.value;
-  const refreshToken = request.cookies.get('refreshToken')?.value;
-
-  // rota pública: se já tem token válido, redireciona pro dashboard
-  if (publicRoutes.includes(pathname)) {
-    if (accessToken) {
-      const session = await verifyAccessToken(accessToken);
-      if (session) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
+  if (!isAuthenticated && protectedRoutes.some((r) => pathname.startsWith(r))) {
+    if (refresh) {
+      const url = new URL('/api/auth/refresh', request.url);
+      url.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(url);
     }
-    return NextResponse.next();
+
+    const login = new URL('/login', request.url);
+    login.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(login);
   }
 
-  // rota protegida: valida o access token
-  if (accessToken) {
-    const session = await verifyAccessToken(accessToken);
-    if (session) return NextResponse.next();
-  }
-
-  // access token expirou mas tem refresh token: tenta renovar
-  if (refreshToken) {
-    const refreshUrl = new URL('/api/auth/refresh', request.url);
-    refreshUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(refreshUrl);
-  }
-
-  // sem autenticação: redireciona pro login
-  return NextResponse.redirect(new URL('/login', request.url));
+  return NextResponse.next();
 }
 
 export const config = {

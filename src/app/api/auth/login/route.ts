@@ -1,54 +1,42 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
-import { createAccessToken, createRefreshToken } from '@/lib/auth';
+import { apiHandler } from '@/lib/http/api-handler';
+import { loginSchema } from '@/schemas/auth.schema';
+import { response } from '@/lib/http/response';
+import { authenticateUser } from '@/services/auth.service';
+import { AUTH_CONFIG } from '@/lib/auth';
+import { checkLoginRateLimit } from '@/lib/redis/rate-limit';
+import { RateLimitError } from '@/errors/RateLimitError';
+import { generateFingerprint } from '@/lib/fingerprint';
+import { getClientIp, getUserAgent } from '@/lib/request-meta';
 
-export async function POST(request: NextRequest) {
-  try {
-    const { email, password } = await request.json();
+export const POST = apiHandler({
+  body: loginSchema,
+  handler: async ({ body, req }) => {
+    const ip = getClientIp(req);
+    const userAgent = getUserAgent(req);
+    const fingerprint = generateFingerprint(ip, userAgent);
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email e senha são obrigatórios.' }, { status: 400 });
+    const { allowed, retryAfter } = await checkLoginRateLimit(body!.email, ip);
+
+    if (!allowed) {
+      throw new RateLimitError('Too many login attempts. Please try again later.', retryAfter);
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const { accessToken, refreshToken } = await authenticateUser(body!, ip, fingerprint);
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return NextResponse.json({ error: 'Email ou senha incorretos.' }, { status: 401 });
-    }
-
-    const accessToken = await createAccessToken({
-      id: user.id,
-      email: user.email,
-      name: user.name,
+    const res = response.ok({
+      message: 'Login successful',
     });
 
-    const refreshToken = await createRefreshToken(user.id);
-
-    const response = NextResponse.json(
-      { message: 'Login realizado com sucesso!' },
-      { status: 200 }
-    );
-
-    response.cookies.set('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 15,
-      path: '/',
+    res.cookies.set('accessToken', accessToken, {
+      ...AUTH_CONFIG.cookieOptions,
+      maxAge: AUTH_CONFIG.accessTokenExpiresIn,
     });
 
-    response.cookies.set('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
+    res.cookies.set('refreshToken', refreshToken, {
+      ...AUTH_CONFIG.cookieOptions,
+      maxAge: AUTH_CONFIG.refreshTokenExpiresIn,
     });
 
-    return response;
-  } catch (error) {
-    console.error('Erro no login:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
-  }
-}
+    return res;
+  },
+});

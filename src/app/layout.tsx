@@ -1,20 +1,14 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
-
 export const metadata: Metadata = {
-  title: 'TrainUp - Plataforma de Treinamentos Gamificados',
-  description: 'Plataforma gamificada para treinamentos corporativos obrigatórios',
+  title: 'Skillquest - Plataforma de Treinamentos Gamificados',
+  description: 'Plataforma gamificada para treinamentos corporativos obrigatorios',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({
@@ -24,7 +18,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="16x16" />
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+      </head>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

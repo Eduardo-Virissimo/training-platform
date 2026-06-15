@@ -1,0 +1,103 @@
+import { AppError } from '@/errors/AppError';
+import { prisma } from '@/lib/prisma';
+import { createTraining } from '@/types/training.types';
+import { UserHandler } from '@/types/user.types';
+
+export const TrainingService = {
+  async createTraining(data: createTraining) {
+    return await prisma.training.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        content: data.content,
+        modules: data.moduleId
+          ? {
+              create: {
+                moduleId: data.moduleId,
+                position: 0,
+              },
+            }
+          : undefined,
+        userTrainings: {
+          create: {
+            user: {
+              connect: {
+                id: data.userId,
+              },
+            },
+            role: 'INSTRUCTOR',
+            status: 'PENDING',
+          },
+        },
+      },
+    });
+  },
+
+  async getTrainingByFilters(id?: string, userId?: string, user: UserHandler | null = null) {
+    if (userId && userId !== user?.id && user?.role !== 'ADMIN') {
+      throw new AppError('You are not allowed to access this training.', 403);
+    }
+    if (user?.role !== 'ADMIN') {
+      userId = user?.id;
+    }
+
+    return await prisma.training
+      .findMany({
+        where: {
+          id,
+          userTrainings: userId
+            ? {
+                some: {
+                  userId,
+                },
+              }
+            : undefined,
+        },
+      })
+      .catch(() => {
+        throw new AppError('Training not found', 404);
+      });
+  },
+
+  async deleteTraining(id: string) {
+    await prisma.training
+      .delete({
+        where: { id },
+      })
+      .catch(() => {
+        throw new AppError('Training not found', 404);
+      });
+  },
+
+  async updateTraining(id: string, data: createTraining) {
+    const training = await prisma.training
+      .update({
+        where: { id },
+        data: {
+          title: data.title,
+          description: data.description,
+          content: data.content,
+          modules: data.moduleId
+            ? {
+                connectOrCreate: {
+                  where: {
+                    moduleId_trainingId: {
+                      moduleId: data.moduleId,
+                      trainingId: id,
+                    },
+                  },
+                  create: {
+                    moduleId: data.moduleId,
+                    position: 0,
+                  },
+                },
+              }
+            : undefined,
+        },
+      })
+      .catch(() => {
+        throw new AppError('Training not found', 404);
+      });
+    return training;
+  },
+};
